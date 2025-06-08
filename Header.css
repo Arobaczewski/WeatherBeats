@@ -1,0 +1,152 @@
+/* ============ HEADER.CSS - Updated for New Layout ============ */
+
+/* Remove container styling since it's handled by App.css */
+.header-container {
+  /* No background, padding, or positioning - handled by parent */
+  display: contents; /* This makes the header transparent to layout */
+}
+
+.header {
+  /* Title styling removed - handled by App.css .header-title */
+  display: none; /* Hide this since title is now in App.jsx */
+}
+
+/* Button container */
+.btn-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Spotify Connection Buttons */
+.btn-connected,
+.btn-disconnected {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 50px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.btn-connected {
+  background: linear-gradient(135deg, #10b981 0%, #065f46 100%);
+  color: white;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+}
+
+.btn-disconnected {
+  background: var(--theme-accent, linear-gradient(135deg, #f59e0b 0%, #d97706 100%));
+  color: white;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3);
+  transition: background 1s ease-in-out, transform 0.3s ease;
+}
+
+.btn-connected:hover,
+.btn-disconnected:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+}
+
+.btn-connected:active,
+.btn-disconnected:active {
+  transform: translateY(0);
+}
+
+/* Add ripple effect */
+.btn-connected::after,
+.btn-disconnected::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease;
+}
+
+.btn-connected:active::after,
+.btn-disconnected:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* ============ RESPONSIVE HEADER ============ */
+
+@media (max-width: 768px) {
+  .btn-connected,
+  .btn-disconnected {
+    padding: 10px 20px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn-connected,
+  .btn-disconnected {
+    padding: 8px 16px;
+    font-size: 0.8rem;
+  }
+}
+
+/* ============ THEME-SPECIFIC BUTTON EFFECTS ============ */
+
+/* Energetic mood - button bounces */
+[data-mood="energetic"] .btn-connected,
+[data-mood="energetic"] .btn-disconnected {
+  animation: button-bounce 3s ease-in-out infinite;
+}
+
+@keyframes button-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+/* Intense mood - dramatic glow */
+[data-mood="intense"] .btn-connected,
+[data-mood="intense"] .btn-disconnected {
+  box-shadow: 0 4px 20px var(--theme-accent), 0 0 30px var(--theme-accent);
+}
+
+/* Dreamy mood - gentle glow */
+[data-mood="dreamy"] .btn-connected,
+[data-mood="dreamy"] .btn-disconnected {
+  animation: dreamy-button-glow 4s ease-in-out infinite;
+}
+
+@keyframes dreamy-button-glow {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.2); }
+}
+
+/* Mysterious mood - fade in/out */
+[data-mood="mysterious"] .btn-connected,
+[data-mood="mysterious"] .btn-disconnected {
+  animation: mysterious-button-fade 6s ease-in-out infinite;
+}
+
+@keyframes mysterious-button-fade {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+/* Chaotic mood - random movements */
+[data-mood="chaotic"] .btn-connected,
+[data-mood="chaotic"] .btn-disconnected {
+  animation: chaotic-button-wiggle 2s ease-in-out infinite;
+}
+
+@keyframes chaotic-button-wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(0.5deg); }
+  75% { transform: rotate(-0.5deg); }
+}
