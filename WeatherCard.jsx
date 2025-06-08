@@ -1,16 +1,26 @@
 import { useState, useEffect } from "react";
-import { Cloud, Sun, CloudRain, MoonStar, CloudFog, Haze, Wind, Tornado, CloudDrizzle, CloudLightning, Snowflake } from 'lucide-react';
+import { Cloud, Sun, CloudRain, MoonStar, CloudFog, Haze, Tornado, CloudDrizzle, CloudLightning, Snowflake } from 'lucide-react';
+import Card from './Card';
+import '../CSS/WeatherCard.css';
+
 function WeatherCard ({ weatherData }){
     const [currentTime, setCurrentTime] = useState('');
     const [icon, setIcon] = useState(null);
 
+    // Early return if no weather data
+    if(!weatherData) {
+        return (
+            <div className="weather-container">
+                <p>Loading weather data...</p>
+            </div>
+        );
+    }
+
     const {
-    name: cityName,
-    main: {temp, feels_like},
-    weather: [{main, description}],
-        } = weatherData;
-
-
+        name: cityName,
+        main: {temp, feels_like},
+        weather: [{main, description}],
+    } = weatherData;
 
     const temperature = Math.round(temp);
     const feelsLike = Math.round(feels_like);
@@ -19,169 +29,108 @@ function WeatherCard ({ weatherData }){
     const weatherMain = main;
     
     useEffect(() => {
-    const updateTime = () => {
-        const now = new Date();
-        let hours = now.getHours();
-        let minutes = now.getMinutes();
-        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const updateTime = () => {
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
 
-        hours = hours % 12;
-        hours = hours ? hours : 12;
+            hours = hours % 12;
+            hours = hours ? hours : 12;
 
-        minutes = minutes < 10 ? '0' + minutes : minutes;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
 
-        const timeString = `${hours}:${minutes} ${ampm}`;
-        setCurrentTime(timeString);
-    };
+            const timeString = `${hours}:${minutes} ${ampm}`;
+            setCurrentTime(timeString);
+        };
 
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
+        updateTime();
+        const interval = setInterval(updateTime, 1000);
+        return () => clearInterval(interval);
     }, []);
 
-
-    if(!weatherData) {
-        return (
-            <div>
-                <p>Loading weather data...</p>
-            </div>
-        );
-    }
-    const weatherIcons = {
-        rain: {
-            lightRain: 'light rain',
-            moderateRain: 'moderate rain',
-            heavyIntensityRain: 'heavy intensity rain',
-            veryHeavyRain: 'very heavy rain',
-            extremeRain: 'extreme rain',
-            freezingRain: 'freezing rain',
-            lightIntensityShowerRain: 'light intensity shower rain',
-            showerRain: 'shower rain',
-            heavyIntensityShowerRain: 'heavy intensity shower rain',
-            raggedShowerRain: 'ragged shower rain'
-        },
-        drizzle: {
-            lightIntensityDrizzle: 'light intensity drizzle',
-            drizzling: 'dizzle',
-            heavyIntensityDrizzle: 'heavy intensity drizzle',
-            lightIntensityDrizzleRain: 'light intensity drizzle rain',
-            drizzleRain: 'drizzle rain',
-            heavyIntensityDrizzleRain: 'heavy intensity drizzle rain',
-            showerRainAndDrizzle: 'shower rain and drizzle',
-            heavyShowerRainAndDrizzle: 'heavy shower rain and drizzle',
-            showerDrizzle: 'shower drizzle'
-        },
-        thunderstorm: {
-            thunderstormWithLightRain: 'thunderstorm with light rain',
-            thunderstormWithRain: 'thunderstorm with rain',
-            thunderstormWithHeavyRain: 'thunderstorm with heavy rain',
-            lightThunderstorm: 'light thunderstorm',
-            thunderstorming: 'thunderstorm',
-            heavyThunderstorm: 'heavy thunderstorm',
-            raggedThunderstorm: 'ragged thunderstorm',
-            thunderstormWithLightDrizzle: 'thunderstorm with light drizzle',
-            thunderstormWithDrizzle: 'thunderstorm with drizzle',
-            thunderstormWithHeavyDrizzle: 'thunderstorm with heavy drizzle'
-        },
-        snow: {
-            lightSnow: 'light snow',
-            snowing: 'snow',
-            heavySnow: 'heavy snow',
-            sleet: 'sleet',
-            lightShowerSleet: 'light shower sleet',
-            showerSleet: 'shower sleet',
-            lightRainAndSnow: 'light rain and snow',
-            rainAndSnow: 'rain and snow',
-            lightShowerSnow: 'light shower snow',
-            showerSnow: 'shower snow',
-            heavyShowerSnow: 'heavy shower snow'
-        },
-        clouds: {
-            fewClouds: 'few clouds',
-            scatteredClouds: 'scattered clouds',
-            brokenClouds: 'broken clouds',
-            overcastClouds: 'overcast clouds'
-        },
-        moon: 'clear sky',
-        sun: 'clear sky',
-        mist: 'mist',
-        smoke: 'smoke',
-        haze: 'haze',
-        dust: {
-            sandDustWhirls: 'sand/dust whirls',
-            dusty: 'dust'
-        },
-        fog: 'fog',
-        ash: 'volcanic ash',
-        tornado: 'tornado'
-    };
-
     useEffect(() => {
-    const isDay = currentTime <= 12;
+        const currentHour = new Date().getHours();
+        const isDay = currentHour >= 6 && currentHour < 18;
 
-    const updateIcon = () => {
-        switch (weatherDescription) {
-            case weatherIcons.rain:
-                setIcon(<CloudRain/>);
-                break;
-            case weatherIcons.drizzle:
-                setIcon(<CloudDrizzle/>);
-                break;
-            case weatherIcons.thunderstorm:
-                setIcon(<CloudLightning/>);
-                break;
-            case weatherIcons.snow:
-                setIcon(<Snowflake/>);
-                break;
-            case weatherIcons.clouds:
-                setIcon(<Cloud/>);
-                break;
-            case weatherIcons.mist:
-                setIcon(<CloudFog/>);
-                break;
-            case weatherIcons.smoke:
-                setIcon(<CloudFog/>);
-                break;
-            case weatherIcons.haze:
-                setIcon(<Haze/>);
-                break;
-            case weatherIcons.dust:
-                setIcon(<Haze/>);
-                break;
-            case weatherIcons.fog:
-                setIcon(<CloudFog/>);
-                break;
-            case weatherIcons.ash:
-                setIcon(<Haze/>);
-                break;
-            case weatherIcons.tornado:
-                setIcon(<Tornado/>);
-                break;
-            default: 
-                if(isDay){
-                    return setIcon(<Sun/>);
-                } else {
-                    return setIcon(<MoonStar/>);
-                } 
-            };
-    };
-    updateIcon();
- }, [weatherDescription]);
-
+        const updateIcon = () => {
+            switch (weatherMain.toLowerCase()) {
+                case 'rain':
+                    setIcon(<CloudRain/>);
+                    break;
+                case 'drizzle':
+                    setIcon(<CloudDrizzle/>);
+                    break;
+                case 'thunderstorm':
+                    setIcon(<CloudLightning/>);
+                    break;
+                case 'snow':
+                    setIcon(<Snowflake/>);
+                    break;
+                case 'clouds':
+                    setIcon(<Cloud/>);
+                    break;
+                case 'mist':
+                    setIcon(<CloudFog/>);
+                    break;
+                case 'smoke':
+                    setIcon(<CloudFog/>);
+                    break;
+                case 'haze':
+                    setIcon(<Haze/>);
+                    break;
+                case 'dust':
+                    setIcon(<Haze/>);
+                    break;
+                case 'fog':
+                    setIcon(<CloudFog/>);
+                    break;
+                case 'ash':
+                    setIcon(<Haze/>);
+                    break;
+                case 'tornado':
+                    setIcon(<Tornado/>);
+                    break;
+                case 'clear':
+                    if(isDay){
+                        setIcon(<Sun/>);
+                    } else {
+                        setIcon(<MoonStar/>);
+                    } 
+                    break;
+                default: 
+                    if(isDay){
+                        setIcon(<Sun/>);
+                    } else {
+                        setIcon(<MoonStar/>);
+                    }
+                    break;
+            }
+        };
+        updateIcon();
+    }, [weatherMain, weatherDescription]);
 
     return (
-        <div>
-            <div>
-                <span>{city}</span>
+        <div className="weather-container">
+            {/* Weather Information Section */}
+            <div className="weather-info-section">
+                <div className="city-container">
+                    <span className="city">{city}</span>
+                </div>
+                <div className="weather">
+                    <span className="temp">Temp: {temperature}°F</span>
+                    <span className="feels-like">Feels like: {feelsLike}°F</span>
+                    <span className="weather-description">{description}</span>
+                </div>
+                <div className="weather-time-icon">
+                    <span className="current-time">{currentTime}</span>
+                    <span className="weather-icon">{icon}</span>
+                </div>
             </div>
-            <div>
-                <span>Temp: {temperature}</span>
-                <span>Feels like: {feelsLike}</span>
-                <span>{description}</span>
-            </div>
-            <div>
-                <span>{currentTime}</span>
-                <span>{icon}</span>
+
+            {/* Music Card Section - Integrated */}
+            <div className="music-card-integrated">
+                <Card weatherData={weatherData} />
             </div>
         </div>
     )
