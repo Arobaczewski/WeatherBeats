@@ -7,7 +7,7 @@ export class SpotifyAuth {
         this.clientId = `${spotify_API_KEY}`;
         this.clientSecret = `${spotify_CLIENT_SECRET}`;
         // Dynamic redirect URI based on current host
-        this.redirectUri = 'https://weatherbeatz.netlify.app/';
+        this.redirectUri = `${window.location.origin}/`;
         this.scope = 'playlist-modify-public playlist-modify-private user-read-private user-read-email user-library-read user-top-read playlist-read-private user-read-recently-played';
         this.baseUrl = 'https://api.spotify.com/v1';
     }
@@ -377,10 +377,14 @@ export class SpotifyAuth {
         return strategies[weather] || strategies.clear;
     }
 
-    // AGGRESSIVE recommendation method to ensure full track count
-    async getRecommendations(weatherMain, limit = 25) {
+    // AGGRESSIVE recommendation method with explicit content buffer
+    async getRecommendations(weatherMain, limit = 25, allowExplicit = true) {
         console.log('=== AGGRESSIVE PLAYLIST GENERATION ===');
-        console.log(`🌍 Weather: ${weatherMain}, Target: ${limit} tracks`);
+        console.log(`🌍 Weather: ${weatherMain}, Target: ${limit} tracks, Allow Explicit: ${allowExplicit}`);
+        
+        // Calculate target with buffer for explicit filtering
+        const targetWithBuffer = allowExplicit ? limit * 1.3 : limit * 2.5; // Get more if filtering explicit
+        console.log(`🎯 Target with buffer: ${Math.round(targetWithBuffer)} tracks (to account for filtering)`);
         
         try {
             let allTracks = [];
@@ -393,118 +397,152 @@ export class SpotifyAuth {
             console.log(`🎯 User market detected: ${userMarket}`);
             console.log(`🌐 Market search order: ${marketList.slice(0, 4).join(', ')}`);
             
-            // PHASE 1: Main search queries (Get bulk of tracks)
+            // More aggressive search queries
             const mainQueries = [
-                // High-yield genre searches
-                `genre:${strategy.genres[0]}`,
-                `genre:${strategy.genres[1]}`,
-                strategy.genres[2] || strategy.genres[0], // Direct genre search
+                // Simple broad searches that usually work
+                'popular',
+                'hits',
+                'top songs',
+                'chart',
                 
-                // Popular artists
+                // Genre searches
+                strategy.genres[0] || 'pop',
+                strategy.genres[1] || 'rock',
+                strategy.genres[2] || 'indie',
+                
+                // Artist searches
                 strategy.artists[0],
                 strategy.artists[1],
                 strategy.artists[2] || strategy.artists[0],
                 
-                // Mood-based searches
-                `${strategy.moods[0]} music`,
-                `${strategy.moods[1]} songs`,
+                // Year-based searches
+                '2024',
+                '2023',
+                '2022',
+                
+                // Mood searches
+                strategy.moods[0] || 'happy',
+                strategy.moods[1] || 'upbeat',
                 
                 // Keyword searches
-                strategy.keywords[0],
-                strategy.keywords[1] || strategy.keywords[0],
+                strategy.keywords[0] || 'music',
                 
-                // Year-based searches for freshness
-                `year:2023-2024`,
-                `year:2022-2024`,
-                
-                // Fallback popular searches
-                'popular music',
-                'top hits',
+                // Universal fallbacks
+                'music',
+                'songs',
                 'trending'
             ];
             
             console.log(`🚀 Starting aggressive search with ${mainQueries.length} queries...`);
             
-            // Execute main searches aggressively
-            for (let i = 0; i < mainQueries.length && allTracks.length < limit * 2; i++) {
+            // Execute main searches with more retries
+            for (let i = 0; i < mainQueries.length && allTracks.length < targetWithBuffer; i++) {
                 const query = mainQueries[i];
+                let searchSuccess = false;
                 
-                // Try primary market first (more results per call)
-                try {
-                    console.log(`🔍 Main Query ${i+1}/${mainQueries.length}: "${query}" in ${userMarket}`);
-                    const results = await this.searchTracks(query, 30, userMarket); // Get 30 per call
+                // Try multiple markets for each query
+                for (let marketIndex = 0; marketIndex < Math.min(marketList.length, 3) && !searchSuccess; marketIndex++) {
+                    const market = marketList[marketIndex];
                     
-                    if (results.length > 0) {
-                        allTracks.push(...results);
-                        console.log(`✅ Added ${results.length} tracks from ${userMarket} (Total: ${allTracks.length})`);
-                    } else if (i < 5) { // Try backup market for first 5 queries only
-                        console.log(`🔄 Trying backup market for critical query`);
-                        const backupResults = await this.searchTracks(query, 30, 'US');
-                        if (backupResults.length > 0) {
-                            allTracks.push(...backupResults);
-                            console.log(`✅ Added ${backupResults.length} tracks from US backup`);
+                    try {
+                        console.log(`🔍 Query ${i+1}/${mainQueries.length}: "${query}" in ${market}`);
+                        const results = await this.searchTracks(query, 40, market); // Get 40 per call
+                        
+                        if (results.length > 0) {
+                            allTracks.push(...results);
+                            console.log(`✅ Added ${results.length} tracks from ${market} (Total: ${allTracks.length})`);
+                            searchSuccess = true;
                         }
+                        
+                        // Quick delay between market attempts
+                        await new Promise(resolve => setTimeout(resolve, 150));
+                        
+                    } catch (error) {
+                        console.error(`Failed query "${query}" in ${market}:`, error);
+                        continue;
                     }
-                    
-                    // Quick delay to avoid overwhelming API
-                    await new Promise(resolve => setTimeout(resolve, 250));
-                    
-                } catch (error) {
-                    console.error(`Failed main query "${query}":`, error);
-                    continue;
                 }
                 
+                // Delay between different queries
+                await new Promise(resolve => setTimeout(resolve, 200));
+                
                 // Early exit if we have enough
-                if (allTracks.length >= limit * 1.5) {
-                    console.log(`🎯 Early exit: Got ${allTracks.length} tracks, more than target`);
+                if (allTracks.length >= targetWithBuffer) {
+                    console.log(`🎯 Early exit: Got ${allTracks.length} tracks, meeting target with buffer`);
                     break;
                 }
             }
             
-            // PHASE 2: Fill-up searches if still short
+            // PHASE 2: Emergency searches if still short
             if (allTracks.length < limit) {
-                console.log(`🔄 Phase 2: Need ${limit - allTracks.length} more tracks, running fill-up searches...`);
+                console.log(`🆘 Phase 2: Need more tracks! Current: ${allTracks.length}, Target: ${limit}`);
                 
-                const fillUpQueries = [
-                    'hits 2024',
-                    'popular songs',
-                    'chart music',
-                    'best music',
-                    'new music',
-                    'trending songs'
+                const emergencyQueries = [
+                    'a', 'the', 'love', 'you', 'me', 'good', 'bad', 'new', 'old', 'song'
                 ];
                 
-                for (const query of fillUpQueries) {
-                    if (allTracks.length >= limit * 1.2) break;
+                for (const query of emergencyQueries) {
+                    if (allTracks.length >= targetWithBuffer) break;
                     
                     try {
-                        const results = await this.searchTracks(query, 25, userMarket);
+                        const results = await this.searchTracks(query, 50, userMarket);
                         if (results.length > 0) {
                             allTracks.push(...results);
-                            console.log(`✅ Fill-up: Added ${results.length} tracks (Total: ${allTracks.length})`);
+                            console.log(`🆘 Emergency: Added ${results.length} tracks (Total: ${allTracks.length})`);
                         }
-                        await new Promise(resolve => setTimeout(resolve, 200));
+                        await new Promise(resolve => setTimeout(resolve, 100));
                     } catch (error) {
-                        console.error(`Fill-up query failed:`, error);
+                        console.error(`Emergency query failed:`, error);
                         continue;
                     }
                 }
             }
 
             if (allTracks.length === 0) {
-                throw new Error('Unable to generate playlist. This may be due to Spotify API restrictions in your region. Please try again.');
+                // Try one last desperate search
+                try {
+                    console.log('🆘 Last resort: Trying basic search...');
+                    const lastResort = await this.searchTracks('music', 50, 'US');
+                    allTracks.push(...lastResort);
+                } catch (finalError) {
+                    console.error('Final search attempt failed:', finalError);
+                }
+                
+                if (allTracks.length === 0) {
+                    throw new Error('Unable to generate playlist. This may be due to Spotify API restrictions in your region. Please try again.');
+                }
             }
 
-            // Process and return final tracks
+            // Process tracks
+            console.log(`📦 Raw tracks collected: ${allTracks.length}`);
+            
             const uniqueTracks = this.removeDuplicates(allTracks);
             console.log(`🧹 After deduplication: ${uniqueTracks.length} unique tracks`);
             
-            const shuffledTracks = this.shuffleArray(uniqueTracks);
+            // Filter explicit content if needed BEFORE final selection
+            let filteredTracks = uniqueTracks;
+            if (!allowExplicit) {
+                const beforeFilter = filteredTracks.length;
+                filteredTracks = uniqueTracks.filter(track => !track.explicit);
+                console.log(`🔞 Explicit filter: ${beforeFilter} → ${filteredTracks.length} (removed ${beforeFilter - filteredTracks.length})`);
+            }
+            
+            if (filteredTracks.length === 0) {
+                throw new Error('No tracks available after filtering. Try enabling explicit content in settings.');
+            }
+            
+            // Ensure we have enough tracks after filtering
+            if (filteredTracks.length < limit) {
+                console.log(`⚠️ Only ${filteredTracks.length} tracks after filtering, need ${limit}. Using all available.`);
+            }
+            
+            const shuffledTracks = this.shuffleArray(filteredTracks);
             const finalTracks = shuffledTracks.slice(0, limit);
 
             console.log(`🎉 FINAL SUCCESS: Generated ${finalTracks.length} tracks out of ${limit} requested`);
             console.log(`📈 Success rate: ${Math.round((finalTracks.length / limit) * 100)}%`);
             console.log(`🌍 Markets used: ${[...new Set(finalTracks.map(t => t.search_market))].join(', ')}`);
+            console.log(`🔞 Explicit content: ${allowExplicit ? 'Allowed' : 'Filtered'}`);
             
             return finalTracks;
 

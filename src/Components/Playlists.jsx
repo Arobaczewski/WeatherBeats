@@ -19,7 +19,7 @@ function Playlists({ weatherData, playlistSettings }){
     } = weatherData || { name: 'Unknown', weather: [{ main: 'Clear' }] };
 
     const weatherMain = main;
-    const playlistLength = playlistSettings?.playlistLength || 30;
+    const playlistLength = playlistSettings?.playlistLength || 10;
     const allowExplicit = playlistSettings?.isExplicit === true;
 
     const totalPages = Math.ceil(tracks.length / tracksPerPage);
@@ -57,9 +57,10 @@ function Playlists({ weatherData, playlistSettings }){
             setPlaylistCreated(false);
             setTracks([]);
 
-            console.log('🎵 Calling getRecommendations...');
-            console.log('Parameters:', { weatherMain, playlistLength });
+            console.log('🎵 Calling getRecommendations with explicit setting...');
+            console.log('Parameters:', { weatherMain, playlistLength, allowExplicit });
             
+            // This now includes the allowExplicit parameter
             const recommendedTracks = await spotifyAuth.getRecommendations(weatherMain, playlistLength, allowExplicit);
             
             console.log('✅ Recommendations received:', recommendedTracks);
@@ -70,21 +71,12 @@ function Playlists({ weatherData, playlistSettings }){
                 throw new Error('Unable to generate playlist. This may be due to Spotify API restrictions or regional limitations. Please try again.');
             }
 
-            console.log('🔍 Filtering explicit content...');
-            let filteredTracks = recommendedTracks;
-            // Note: Filtering is now done in the API method itself for better track count management
-            
-            if (filteredTracks.length === 0) {
-                console.error('❌ No tracks after filtering');
-                setError('No tracks found for this weather condition. Try enabling explicit content in settings.');
-                return;
-            }
-
+            // The filtering is now handled in the API method itself
             console.log('✅ Setting final tracks...');
-            setTracks(filteredTracks);
+            setTracks(recommendedTracks);
             setPlaylistCreated(true);
             
-            console.log(`🎉 SUCCESS: Generated ${filteredTracks.length} tracks`);
+            console.log(`🎉 SUCCESS: Generated ${recommendedTracks.length} tracks`);
 
         } catch (error) {
             console.error('💥 Playlist generation error:', error);
@@ -97,6 +89,8 @@ function Playlists({ weatherData, playlistSettings }){
                 setError('⚠️ Spotify access denied - this may be due to regional restrictions or API limitations');
             } else if (error.message.includes('regional limitations')) {
                 setError('⚠️ Regional limitations detected. Trying different markets may help - please try regenerating.');
+            } else if (error.message.includes('No tracks available after filtering')) {
+                setError('⚠️ No clean tracks found for this weather. Try enabling explicit content in settings.');
             } else {
                 setError(error.message || 'Failed to generate playlist. Please try again.');
             }
@@ -155,7 +149,7 @@ function Playlists({ weatherData, playlistSettings }){
             const playlist = await spotifyAuth.createPlaylist(
                 user.id,
                 `${cityName} - ${weatherMain} Vibes`,
-                `Perfect playlist for ${weatherMain.toLowerCase()} weather in ${cityName}. Generated with ${tracks.length} tracks using WeatherBeats (Post-Nov 2024 API).`,
+                `Perfect playlist for ${weatherMain.toLowerCase()} weather in ${cityName}. Generated with ${tracks.length} tracks using WeatherBeats.`,
                 false
             );
             
@@ -219,6 +213,15 @@ function Playlists({ weatherData, playlistSettings }){
                             </>
                         )}
                     </button>
+                    
+                    <div className="generation-info">
+                        <Info size={14} />
+                        <small>
+                            {allowExplicit ? 'Including all content' : 'Clean content only'} • 
+                            Requesting {playlistLength} tracks • 
+                            Songs will open in Spotify for full playback.
+                        </small>
+                    </div>
                 </div>
             )}
 
