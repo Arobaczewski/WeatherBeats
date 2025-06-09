@@ -170,7 +170,7 @@ function Playlists({ weatherData, playlistSettings }){
                 
                 // If we got very few new tracks, break to avoid infinite loop
                 if (newTracks.length < 2 && attempts > 1) {
-                    console.log('Breaking early - not getting enough new tracks');
+                    console.log('ot getting enough new tracks');
                     break;
                 }
             }
