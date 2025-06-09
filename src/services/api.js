@@ -1,55 +1,12 @@
-// Spotify 
+// Spotify API - Optimized for Global Users and Regional Restrictions
 const spotify_API_KEY = import.meta.env.VITE_SPOTIFY_API_KEY;
 
 export class SpotifyAuth {
     constructor() {
         this.clientId = `${spotify_API_KEY}`;
-        this.redirectUri = 'http://127.0.0.1:5173';
+        this.redirectUri = 'https://weatherbeatz.netlify.app/';
         this.scope = 'playlist-modify-public playlist-modify-private user-read-private user-read-email user-library-read user-top-read playlist-read-private user-read-recently-played';
         this.baseUrl = 'https://api.spotify.com/v1';
-    }
-    async debugAuthStatus() {
-    console.log('=== DEBUGGING SPOTIFY AUTH ===');
-    
-    const accessToken = localStorage.getItem('access_token');
-    const refreshToken = localStorage.getItem('refresh_token');
-    const expiresAt = localStorage.getItem('token_expires_at');
-    
-    console.log('Stored access token exists:', !!accessToken);
-    console.log('Stored refresh token exists:', !!refreshToken);
-    console.log('Token expires at:', expiresAt);
-    console.log('Current time:', Date.now());
-    console.log('Token expired:', expiresAt ? Date.now() > parseInt(expiresAt) : 'No expiry time');
-    
-    if (accessToken) {
-        try {
-            const response = await fetch('https://api.spotify.com/v1/me', {
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            
-            console.log('Token test response status:', response.status);
-            if (response.ok) {
-                const data = await response.json();
-                console.log('Token is valid! User:', data.display_name || data.id);
-                console.log('User country:', data.country);
-            } else {
-                const errorText = await response.text();
-                console.error('Token test failed:', errorText);
-            }
-        } catch (error) {
-            console.error('Token test error:', error);
-        }
-    }
-    
-    return {
-        hasAccessToken: !!accessToken,
-        hasRefreshToken: !!refreshToken,
-        tokenExpired: expiresAt ? Date.now() > parseInt(expiresAt) : null,
-        isLoggedIn: this.isLoggedIn()
-    };
     }
 
     // Generate random string for PKCE
@@ -198,9 +155,54 @@ export class SpotifyAuth {
         localStorage.removeItem('code_verifier');
     }
 
-    // ========== ENHANCED FOR GLOBAL COMPATIBILITY ==========
+    // Debug auth status
+    async debugAuthStatus() {
+        console.log('=== DEBUGGING SPOTIFY AUTH ===');
+        
+        const accessToken = localStorage.getItem('access_token');
+        const refreshToken = localStorage.getItem('refresh_token');
+        const expiresAt = localStorage.getItem('token_expires_at');
+        
+        console.log('Stored access token exists:', !!accessToken);
+        console.log('Stored refresh token exists:', !!refreshToken);
+        console.log('Token expires at:', expiresAt);
+        console.log('Current time:', Date.now());
+        console.log('Token expired:', expiresAt ? Date.now() > parseInt(expiresAt) : 'No expiry time');
+        
+        if (accessToken) {
+            try {
+                const response = await fetch('https://api.spotify.com/v1/me', {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('Token test response status:', response.status);
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Token is valid! User:', data.display_name || data.id);
+                    console.log('User country:', data.country);
+                } else {
+                    const errorText = await response.text();
+                    console.error('Token test failed:', errorText);
+                }
+            } catch (error) {
+                console.error('Token test error:', error);
+            }
+        }
+        
+        return {
+            hasAccessToken: !!accessToken,
+            hasRefreshToken: !!refreshToken,
+            tokenExpired: expiresAt ? Date.now() > parseInt(expiresAt) : null,
+            isLoggedIn: this.isLoggedIn()
+        };
+    }
 
-    // Get user's country for market-specific searches
+    // ========== ENHANCED GLOBAL SEARCH STRATEGY ==========
+
+    // Get user's market for regional content
     async getUserMarket() {
         try {
             const accessToken = await this.getValidAccessToken();
@@ -210,7 +212,8 @@ export class SpotifyAuth {
             
             if (response.ok) {
                 const userData = await response.json();
-                return userData.country || 'US'; // Fallback to US
+                console.log(`🌍 User market detected: ${userData.country}`);
+                return userData.country || 'US';
             }
             return 'US';
         } catch (error) {
@@ -219,25 +222,88 @@ export class SpotifyAuth {
         }
     }
 
-    // Enhanced search with multiple markets and fallbacks
-    async searchTracks(accessToken, query, limit = 20, userMarket = 'US') {
-        console.log(`🔍 Searching for: "${query}" in market: ${userMarket}`);
-        
-        // Try multiple markets for better global coverage
-        const marketsToTry = [
-            userMarket,           // User's country first
-            'US',                 // US market (largest)
-            'GB',                 // UK market
-            'DE',                 // German market
-            'FR',                 // French market
-            'ES',                 // Spanish market
-            'AU',                 // Australian market
+    // Global priority markets with largest catalogs
+    getGlobalMarkets(userMarket) {
+        const topMarkets = [
+            userMarket,    // User's country first
+            'US',          // Largest catalog
+            'GB',          // Large English catalog
+            'DE',          // Large European catalog
+            'FR',          // French catalog
+            'CA',          // Canadian catalog
+            'AU',          // Australian catalog
+            'SE',          // Swedish catalog (Spotify's home)
+            'NL',          // Netherlands
+            'ES',          // Spanish catalog
         ];
+        
+        // Remove duplicates and return top 6
+        return [...new Set(topMarkets)].slice(0, 6);
+    }
 
-        // Remove duplicates and limit to first 3 markets
-        const uniqueMarkets = [...new Set(marketsToTry)].slice(0, 3);
+    // Ultra-global search terms that work in most markets
+    getUniversalSearchTerms(weatherMain) {
+        const weather = weatherMain.toLowerCase();
+        
+        // Use only the most globally available artists and generic terms
+        const searchTerms = {
+            clear: [
+                // Top global superstars (available everywhere)
+                'Taylor Swift', 'Ed Sheeran', 'Billie Eilish', 'Ariana Grande',
+                // Generic terms that work globally
+                'pop music', 'happy music', 'dance music', 'good vibes',
+                'top hits', 'feel good songs', 'upbeat songs', 'positive music'
+            ],
+            sunny: [
+                'Dua Lipa', 'The Weeknd', 'Bruno Mars', 'Post Malone',
+                'summer music', 'party music', 'tropical music', 'beach music',
+                'dance hits', 'reggaeton', 'latin music', 'vacation music'
+            ],
+            rain: [
+                'Adele', 'Sam Smith', 'Lewis Capaldi', 'John Legend',
+                'sad music', 'ballads', 'slow music', 'emotional music',
+                'acoustic music', 'piano music', 'melancholy', 'heartbreak'
+            ],
+            drizzle: [
+                'Lorde', 'Lana Del Rey', 'Phoebe Bridgers', 'Clairo',
+                'indie music', 'chill music', 'mellow music', 'soft music',
+                'alternative music', 'bedroom pop', 'lo-fi', 'dreamy music'
+            ],
+            thunderstorm: [
+                'Imagine Dragons', 'OneRepublic', 'Coldplay', 'Maroon 5',
+                'rock music', 'powerful music', 'energy music', 'anthems',
+                'alternative rock', 'pop rock', 'stadium music', 'epic music'
+            ],
+            snow: [
+                'Bon Iver', 'Iron Wine', 'Fleet Foxes', 'Sufjan Stevens',
+                'winter music', 'acoustic music', 'folk music', 'peaceful music',
+                'quiet music', 'ambient music', 'calm music', 'cozy music'
+            ],
+            clouds: [
+                'Arctic Monkeys', 'The 1975', 'Vampire Weekend', 'Tame Impala',
+                'indie rock', 'alternative music', 'modern rock', 'indie pop',
+                'brit rock', 'garage rock', 'psychedelic', 'experimental'
+            ],
+            mist: [
+                'Radiohead', 'Massive Attack', 'Portishead', 'James Blake',
+                'electronic music', 'ambient music', 'trip hop', 'atmospheric',
+                'experimental music', 'downtempo', 'chillout', 'ethereal'
+            ],
+            fog: [
+                'Bonobo', 'Tycho', 'Four Tet', 'Burial',
+                'ambient electronic', 'instrumental', 'soundscapes', 'meditation',
+                'lounge music', 'minimal music', 'background music', 'study music'
+            ]
+        };
 
-        for (const market of uniqueMarkets) {
+        return searchTerms[weather] || searchTerms.clear;
+    }
+
+    // Enhanced search with aggressive market and fallback strategies
+    async searchTracksGlobal(accessToken, query, limit = 20, markets = ['US']) {
+        console.log(`🌍 Global search for: "${query}" across markets: ${markets.join(', ')}`);
+        
+        for (const market of markets) {
             try {
                 const params = new URLSearchParams({
                     q: query,
@@ -250,101 +316,69 @@ export class SpotifyAuth {
                     headers: { 'Authorization': `Bearer ${accessToken}` }
                 });
 
-                if (!response.ok) {
-                    console.log(`Search failed for market ${market}: ${response.status}`);
-                    continue; // Try next market
-                }
-
-                const data = await response.json();
-                const tracks = data.tracks?.items || [];
-                
-                console.log(`📊 Results for "${query}" in ${market}: ${tracks.length} tracks`);
-                
-                if (tracks.length > 0) {
-                    // Filter and enhance tracks
-                    const validTracks = tracks
-                        .filter(track => track && track.id && track.name && track.artists && track.artists.length > 0)
-                        .map(track => ({
-                            ...track,
-                            has_real_preview: !!track.preview_url,
-                            search_market: market // Track which market provided this result
-                        }));
+                if (response.ok) {
+                    const data = await response.json();
+                    const tracks = data.tracks?.items || [];
                     
-                    console.log(`✅ Valid tracks from ${market}: ${validTracks.length}`);
-                    return validTracks;
+                    if (tracks.length > 0) {
+                        console.log(`✅ Found ${tracks.length} tracks in ${market} for "${query}"`);
+                        
+                        return tracks
+                            .filter(track => track && track.id && track.name && track.artists && track.artists.length > 0)
+                            .map(track => ({
+                                ...track,
+                                has_real_preview: !!track.preview_url,
+                                search_market: market,
+                                search_query: query
+                            }));
+                    }
+                } else {
+                    console.log(`❌ Search failed in ${market}: ${response.status}`);
                 }
             } catch (error) {
                 console.error(`Error searching in market ${market}:`, error);
-                continue; // Try next market
             }
+            
+            // Small delay between market attempts
+            await new Promise(resolve => setTimeout(resolve, 100));
         }
-
-        console.log(`❌ No results found in any market for: "${query}"`);
+        
+        console.log(`❌ No results for "${query}" in any market`);
         return [];
     }
 
-    // More diverse and globally relevant search terms
-    getGlobalWeatherSearchTerms(weatherMain) {
-        const weather = weatherMain.toLowerCase();
+    // Ultimate fallback searches guaranteed to work globally
+    async getGlobalFallback(accessToken, markets) {
+        console.log('🚨 Attempting global fallback searches...');
         
-        const searchTerms = {
-            clear: [
-                // Popular global artists
-                'Ed Sheeran', 'Taylor Swift', 'Billie Eilish', 'The Weeknd', 'Dua Lipa',
-                // Genre terms that work globally
-                'pop hits', 'happy songs', 'upbeat music', 'feel good', 'sunshine',
-                // Universal mood terms
-                'good vibes', 'positive music', 'summer hits', 'dance pop'
-            ],
-            sunny: [
-                'Bruno Mars', 'Harry Styles', 'Olivia Rodrigo', 'Doja Cat', 'Post Malone',
-                'summer songs', 'tropical house', 'reggaeton', 'afrobeats', 'party music',
-                'beach vibes', 'vacation music', 'latin pop', 'island music'
-            ],
-            rain: [
-                'Adele', 'Sam Smith', 'Lewis Capaldi', 'Billie Eilish', 'Lorde',
-                'sad songs', 'rainy day', 'melancholy', 'emotional ballads', 'indie sad',
-                'acoustic rain', 'heartbreak songs', 'slow songs', 'piano ballads'
-            ],
-            drizzle: [
-                'Bon Iver', 'Phoebe Bridgers', 'Lana Del Rey', 'Clairo', 'Rex Orange County',
-                'chill indie', 'soft rock', 'bedroom pop', 'lo-fi', 'mellow',
-                'acoustic chill', 'indie folk', 'dreamy pop', 'soft indie'
-            ],
-            thunderstorm: [
-                'Imagine Dragons', 'OneRepublic', 'Maroon 5', 'Coldplay', 'Linkin Park',
-                'epic music', 'powerful songs', 'anthems', 'rock hits', 'intense music',
-                'stadium rock', 'alt rock', 'energetic', 'driving music'
-            ],
-            snow: [
-                'Bon Iver', 'Fleet Foxes', 'Iron & Wine', 'The Paper Kites', 'Daughter',
-                'winter songs', 'acoustic folk', 'indie winter', 'peaceful music', 'calm',
-                'ambient folk', 'quiet songs', 'cozy music', 'fireside songs'
-            ],
-            clouds: [
-                'Arctic Monkeys', 'Tame Impala', 'The 1975', 'Vampire Weekend', 'Foster the People',
-                'indie rock', 'alternative', 'modern rock', 'indie pop', 'brit pop',
-                'garage rock', 'indie alternative', 'modern alternative', 'cool indie'
-            ],
-            mist: [
-                'James Blake', 'FKA twigs', 'Thom Yorke', 'Radiohead', 'Massive Attack',
-                'electronic', 'ambient', 'trip hop', 'atmospheric', 'experimental',
-                'downtempo', 'chillwave', 'synth pop', 'dream pop'
-            ],
-            fog: [
-                'Portishead', 'Bonobo', 'Tycho', 'Burial', 'Four Tet',
-                'ambient electronic', 'chillout', 'lounge', 'minimal', 'soundscapes',
-                'instrumental', 'electronic ambient', 'chill electronic', 'meditation music'
-            ]
-        };
-
-        return searchTerms[weather] || searchTerms.clear;
+        const universalFallbacks = [
+            // These should work in virtually any market
+            'music',
+            'songs',
+            'pop',
+            'hits',
+            'popular',
+            'chart',
+            'radio',
+            'playlist'
+        ];
+        
+        for (const fallback of universalFallbacks) {
+            const results = await this.searchTracksGlobal(accessToken, fallback, 30, markets);
+            if (results.length > 0) {
+                console.log(`✅ Global fallback success with "${fallback}": ${results.length} tracks`);
+                return results;
+            }
+            await new Promise(resolve => setTimeout(resolve, 200));
+        }
+        
+        return [];
     }
 
-    // Enhanced recommendation method with global market support
+    // Main recommendation method - ULTRA GLOBAL COMPATIBLE
     async getRecommendations(weatherMain, limit = 25) {
-        console.log('=== ENHANCED GLOBAL PLAYLIST GENERATION ===');
-        console.log(`Weather: ${weatherMain}, Requested: ${limit} tracks`);
+        console.log('=== ULTRA-GLOBAL PLAYLIST GENERATION ===');
+        console.log(`🌍 Weather: ${weatherMain}, Requested: ${limit} tracks`);
         
         try {
             const accessToken = await this.getValidAccessToken();
@@ -352,95 +386,100 @@ export class SpotifyAuth {
                 throw new Error('Not authenticated with Spotify');
             }
 
-            console.log('✅ Access token obtained');
-
-            // Get user's market for localized results
+            // Get user's market and global market list
             const userMarket = await this.getUserMarket();
-            console.log(`🌍 User market: ${userMarket}`);
+            const markets = this.getGlobalMarkets(userMarket);
+            console.log(`🌍 Search markets: ${markets.join(', ')}`);
 
             let allTracks = [];
-            const searchTerms = this.getGlobalWeatherSearchTerms(weatherMain);
+            const searchTerms = this.getUniversalSearchTerms(weatherMain);
             
-            console.log('🎯 Starting search with global terms...');
+            console.log('🎯 Starting global search strategy...');
             
-            // Search with multiple terms across different markets
-            const tracksPerSearch = Math.ceil((limit * 2) / Math.min(searchTerms.length, 8));
-            
-            for (const term of searchTerms.slice(0, 8)) { // Limit to 8 searches
-                if (allTracks.length >= limit * 2) break;
+            // Phase 1: Weather-specific searches across all markets
+            for (const term of searchTerms.slice(0, 6)) {
+                if (allTracks.length >= limit * 1.5) break;
                 
-                const searchResults = await this.searchTracks(accessToken, term, tracksPerSearch, userMarket);
-                
-                if (searchResults.length > 0) {
-                    allTracks.push(...searchResults);
-                    console.log(`✅ Added ${searchResults.length} tracks from "${term}"`);
-                } else {
-                    console.log(`⚠️ No results for "${term}" - continuing...`);
+                const results = await this.searchTracksGlobal(accessToken, term, 15, markets);
+                if (results.length > 0) {
+                    allTracks.push(...results);
+                    console.log(`✅ Added ${results.length} tracks from "${term}"`);
                 }
                 
-                // Delay to avoid rate limiting
-                await new Promise(resolve => setTimeout(resolve, 150));
+                await new Promise(resolve => setTimeout(resolve, 200));
             }
             
-            console.log(`📊 Total tracks collected: ${allTracks.length}`);
+            console.log(`📊 Phase 1 results: ${allTracks.length} tracks`);
 
-            // Enhanced fallback if still no results
+            // Phase 2: If still no results, try basic music terms
             if (allTracks.length === 0) {
-                console.log('🔄 No results found, trying global fallback...');
+                console.log('🔄 Phase 2: Basic music search...');
                 
-                const globalFallbacks = [
-                    'top 50 global', 'viral 50 global', 'today top hits', 
-                    'global top 50', 'trending music', 'popular music'
-                ];
-                
-                for (const fallback of globalFallbacks) {
-                    const fallbackResults = await this.searchTracks(accessToken, fallback, 20, 'US');
-                    if (fallbackResults.length > 0) {
-                        allTracks.push(...fallbackResults);
-                        console.log(`✅ Fallback success with "${fallback}": ${fallbackResults.length} tracks`);
+                const basicTerms = ['music', 'songs', 'pop', 'hits'];
+                for (const term of basicTerms) {
+                    const results = await this.searchTracksGlobal(accessToken, term, 20, markets);
+                    if (results.length > 0) {
+                        allTracks.push(...results);
+                        console.log(`✅ Basic search success with "${term}": ${results.length} tracks`);
                         break;
                     }
-                    await new Promise(resolve => setTimeout(resolve, 200));
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                }
+            }
+
+            // Phase 3: Ultimate fallback - guaranteed to work
+            if (allTracks.length === 0) {
+                console.log('🚨 Phase 3: Ultimate global fallback...');
+                allTracks = await this.getGlobalFallback(accessToken, markets);
+            }
+
+            // Phase 4: Last resort - search without market restriction
+            if (allTracks.length === 0) {
+                console.log('🆘 Phase 4: Last resort - no market restrictions...');
+                try {
+                    const response = await fetch(`${this.baseUrl}/search?q=music&type=track&limit=30`, {
+                        headers: { 'Authorization': `Bearer ${accessToken}` }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        allTracks = (data.tracks?.items || [])
+                            .filter(track => track && track.id)
+                            .map(track => ({
+                                ...track,
+                                has_real_preview: !!track.preview_url,
+                                search_market: 'global',
+                                search_query: 'music'
+                            }));
+                        console.log(`🆘 Last resort found: ${allTracks.length} tracks`);
+                    }
+                } catch (error) {
+                    console.error('Last resort search failed:', error);
                 }
             }
 
             if (allTracks.length === 0) {
-                throw new Error(`No tracks found for ${weatherMain} weather. This might be due to regional restrictions or temporary API issues. Please try again.`);
+                throw new Error(`Unable to find any music in your region. This may be due to strict regional restrictions. Please try using a VPN or contact support.`);
             }
 
-            // Remove duplicates and prepare final list
+            // Process and return results
             const uniqueTracks = this.removeDuplicates(allTracks);
-            console.log(`📊 After deduplication: ${uniqueTracks.length} tracks`);
+            const shuffledTracks = this.shuffleArray(uniqueTracks);
+            const finalTracks = shuffledTracks.slice(0, limit);
 
-            // Check preview availability
-            const tracksWithPreviews = uniqueTracks.filter(track => track.has_real_preview);
-            console.log(`🎵 Tracks with previews: ${tracksWithPreviews.length}/${uniqueTracks.length}`);
+            console.log(`🎉 GLOBAL SUCCESS: ${finalTracks.length} tracks`);
+            console.log(`🌍 Markets used: ${[...new Set(finalTracks.map(t => t.search_market))].join(', ')}`);
+            console.log(`🎵 Preview rate: ${finalTracks.filter(t => t.has_real_preview).length}/${finalTracks.length}`);
 
-            // Shuffle and return requested amount
-            const shuffledTracks = this.shuffleArray(uniqueTracks).slice(0, limit);
-
-            console.log(`🎉 SUCCESS: Returning ${shuffledTracks.length} tracks`);
-            console.log(`🌍 Markets used: ${[...new Set(shuffledTracks.map(t => t.search_market))].join(', ')}`);
-
-            return shuffledTracks;
+            return finalTracks;
 
         } catch (error) {
-            console.error('💥 Playlist generation failed:', error);
-            
-            // Enhanced error messaging
-            if (error.message.includes('403') || error.message.includes('Forbidden')) {
-                throw new Error('Access denied - this might be due to geographic restrictions. Please try logging out and back in.');
-            } else if (error.message.includes('429') || error.message.includes('rate limit')) {
-                throw new Error('Too many requests - please wait a moment and try again.');
-            } else if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-                throw new Error('Authentication expired - please log out and back in.');
-            }
-            
+            console.error('💥 Global playlist generation failed:', error);
             throw error;
         }
     }
 
-    // Enhanced duplicate removal with better matching
+    // Enhanced duplicate removal
     removeDuplicates(tracks) {
         const seen = new Set();
         const seenCombos = new Set();
@@ -448,17 +487,11 @@ export class SpotifyAuth {
         return tracks.filter(track => {
             if (!track || !track.id) return false;
             
-            // Remove exact duplicates by ID
-            if (seen.has(track.id)) {
-                return false;
-            }
+            if (seen.has(track.id)) return false;
             seen.add(track.id);
             
-            // Remove near-duplicates by artist + track name combination
             const combo = `${track.artists[0]?.name?.toLowerCase()}-${track.name?.toLowerCase()}`;
-            if (seenCombos.has(combo)) {
-                return false;
-            }
+            if (seenCombos.has(combo)) return false;
             seenCombos.add(combo);
             
             return true;
@@ -475,6 +508,7 @@ export class SpotifyAuth {
         return shuffled;
     }
 
+    // Rest of methods (getUserProfile, createPlaylist, etc.) remain the same...
     async getUserProfile() {
         const accessToken = await this.getValidAccessToken();
         if (!accessToken) {
@@ -563,7 +597,7 @@ export class SpotifyAuth {
     }
 }
 
-// Weather API
+// Weather API (unchanged)
 const weather_API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
 
 export const getWeather = async (latitude, longitude) => {
