@@ -165,7 +165,7 @@ function App() {
       {/* Header Section - Title centered, Spotify button right */}
       <div className="header-section">
         <div className="header-title">
-          <h1>WeatherBeats</h1>
+          <h1>WeatherBeatz</h1>
         </div>
         <div className="header-actions">
           <Header />
