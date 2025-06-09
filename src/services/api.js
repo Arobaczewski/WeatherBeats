@@ -4,9 +4,52 @@ const spotify_API_KEY = import.meta.env.VITE_SPOTIFY_API_KEY;
 export class SpotifyAuth {
     constructor() {
         this.clientId = `${spotify_API_KEY}`;
-        this.redirectUri = 'https://weatherbeatz.netlify.app/';
+        this.redirectUri = 'http://127.0.0.1:5173';
         this.scope = 'playlist-modify-public playlist-modify-private user-read-private user-read-email user-library-read user-top-read playlist-read-private user-read-recently-played';
         this.baseUrl = 'https://api.spotify.com/v1';
+    }
+    async debugAuthStatus() {
+    console.log('=== DEBUGGING SPOTIFY AUTH ===');
+    
+    const accessToken = localStorage.getItem('access_token');
+    const refreshToken = localStorage.getItem('refresh_token');
+    const expiresAt = localStorage.getItem('token_expires_at');
+    
+    console.log('Stored access token exists:', !!accessToken);
+    console.log('Stored refresh token exists:', !!refreshToken);
+    console.log('Token expires at:', expiresAt);
+    console.log('Current time:', Date.now());
+    console.log('Token expired:', expiresAt ? Date.now() > parseInt(expiresAt) : 'No expiry time');
+    
+    if (accessToken) {
+        try {
+            const response = await fetch('https://api.spotify.com/v1/me', {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            console.log('Token test response status:', response.status);
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Token is valid! User:', data.display_name || data.id);
+                console.log('User country:', data.country);
+            } else {
+                const errorText = await response.text();
+                console.error('Token test failed:', errorText);
+            }
+        } catch (error) {
+            console.error('Token test error:', error);
+        }
+    }
+    
+    return {
+        hasAccessToken: !!accessToken,
+        hasRefreshToken: !!refreshToken,
+        tokenExpired: expiresAt ? Date.now() > parseInt(expiresAt) : null,
+        isLoggedIn: this.isLoggedIn()
+    };
     }
 
     // Generate random string for PKCE
