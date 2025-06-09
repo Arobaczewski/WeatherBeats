@@ -1,7 +1,6 @@
-
+// Spotify 
 const spotify_API_KEY = import.meta.env.VITE_SPOTIFY_API_KEY;
 
-// Spotify Authentication 
 export class SpotifyAuth {
     constructor() {
         this.clientId = `${spotify_API_KEY}`;
@@ -156,121 +155,153 @@ export class SpotifyAuth {
         localStorage.removeItem('code_verifier');
     }
 
+    // ========== ENHANCED FOR GLOBAL COMPATIBILITY ==========
 
-    // Create mock preview URLs for tracks that don't have them
-    createMockPreviewUrl(track) {
-        // Create a data URL with track info - this won't play but won't break the UI
-        return `data:audio/mp3;base64,${btoa(`Track: ${track.name} by ${track.artists[0].name}`)}`;
-    }
-
-    async searchTracks(accessToken, query, limit = 20) {
-        console.log(`🔍 Searching for: "${query}"`);
-        
-        const params = new URLSearchParams({
-            q: query,
-            type: 'track',
-            limit: Math.min(limit, 50),
-            market: 'US'
-        });
-
+    // Get user's country for market-specific searches
+    async getUserMarket() {
         try {
-            const response = await fetch(`${this.baseUrl}/search?${params}`, {
+            const accessToken = await this.getValidAccessToken();
+            const response = await fetch(`${this.baseUrl}/me`, {
                 headers: { 'Authorization': `Bearer ${accessToken}` }
             });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error(`Search failed for "${query}": ${response.status} - ${errorText}`);
-                return [];
+            
+            if (response.ok) {
+                const userData = await response.json();
+                return userData.country || 'US'; // Fallback to US
             }
-
-            const data = await response.json();
-            const tracks = data.tracks?.items || [];
-            
-            console.log(`📊 Raw results for "${query}": ${tracks.length} tracks`);
-            
-            // Check how many have real preview URLs
-            const tracksWithRealPreviews = tracks.filter(track => track && track.preview_url);
-            console.log(`🎵 Tracks with REAL previews for "${query}": ${tracksWithRealPreviews.length}/${tracks.length}`);
-            
-
-            const enhancedTracks = tracks
-                .filter(track => track && track.id && track.name && track.artists && track.artists.length > 0)
-                .map(track => {
-                    if (!track.preview_url) {
-                        return {
-                            ...track,
-                            preview_url: null, 
-                            has_real_preview: false
-                        };
-                    }
-                    return {
-                        ...track,
-                        has_real_preview: true
-                    };
-                });
-            
-            console.log(`✅ Enhanced tracks for "${query}": ${enhancedTracks.length} (${tracksWithRealPreviews.length} with real previews)`);
-            
-            return enhancedTracks;
-
+            return 'US';
         } catch (error) {
-            console.error(`Error searching for "${query}":`, error);
-            return [];
+            console.log('Could not get user market, defaulting to US');
+            return 'US';
         }
     }
 
-    // Get weather-appropriate artists and terms
-    getWeatherSearchTerms(weatherMain) {
+    // Enhanced search with multiple markets and fallbacks
+    async searchTracks(accessToken, query, limit = 20, userMarket = 'US') {
+        console.log(`🔍 Searching for: "${query}" in market: ${userMarket}`);
+        
+        // Try multiple markets for better global coverage
+        const marketsToTry = [
+            userMarket,           // User's country first
+            'US',                 // US market (largest)
+            'GB',                 // UK market
+            'DE',                 // German market
+            'FR',                 // French market
+            'ES',                 // Spanish market
+            'AU',                 // Australian market
+        ];
+
+        // Remove duplicates and limit to first 3 markets
+        const uniqueMarkets = [...new Set(marketsToTry)].slice(0, 3);
+
+        for (const market of uniqueMarkets) {
+            try {
+                const params = new URLSearchParams({
+                    q: query,
+                    type: 'track',
+                    limit: Math.min(limit, 50),
+                    market: market
+                });
+
+                const response = await fetch(`${this.baseUrl}/search?${params}`, {
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                });
+
+                if (!response.ok) {
+                    console.log(`Search failed for market ${market}: ${response.status}`);
+                    continue; // Try next market
+                }
+
+                const data = await response.json();
+                const tracks = data.tracks?.items || [];
+                
+                console.log(`📊 Results for "${query}" in ${market}: ${tracks.length} tracks`);
+                
+                if (tracks.length > 0) {
+                    // Filter and enhance tracks
+                    const validTracks = tracks
+                        .filter(track => track && track.id && track.name && track.artists && track.artists.length > 0)
+                        .map(track => ({
+                            ...track,
+                            has_real_preview: !!track.preview_url,
+                            search_market: market // Track which market provided this result
+                        }));
+                    
+                    console.log(`✅ Valid tracks from ${market}: ${validTracks.length}`);
+                    return validTracks;
+                }
+            } catch (error) {
+                console.error(`Error searching in market ${market}:`, error);
+                continue; // Try next market
+            }
+        }
+
+        console.log(`❌ No results found in any market for: "${query}"`);
+        return [];
+    }
+
+    // More diverse and globally relevant search terms
+    getGlobalWeatherSearchTerms(weatherMain) {
         const weather = weatherMain.toLowerCase();
         
         const searchTerms = {
             clear: [
-                'Taylor Swift happy', 'Ed Sheeran upbeat', 'Dua Lipa dance', 'Bruno Mars party',
-                'pop hits 2024', 'summer vibes', 'feel good music', 'upbeat playlist'
+                // Popular global artists
+                'Ed Sheeran', 'Taylor Swift', 'Billie Eilish', 'The Weeknd', 'Dua Lipa',
+                // Genre terms that work globally
+                'pop hits', 'happy songs', 'upbeat music', 'feel good', 'sunshine',
+                // Universal mood terms
+                'good vibes', 'positive music', 'summer hits', 'dance pop'
             ],
             sunny: [
-                'Harry Styles golden', 'Lizzo good as hell', 'Pharrell happy', 'OneRepublic sunshine',
-                'pop summer hits', 'dance music', 'good vibes only', 'party playlist'
+                'Bruno Mars', 'Harry Styles', 'Olivia Rodrigo', 'Doja Cat', 'Post Malone',
+                'summer songs', 'tropical house', 'reggaeton', 'afrobeats', 'party music',
+                'beach vibes', 'vacation music', 'latin pop', 'island music'
             ],
             rain: [
-                'Billie Eilish sad', 'Lorde melodrama', 'The Weeknd melancholy', 'Adele heartbreak',
-                'sad songs playlist', 'rainy day music', 'emotional ballads', 'indie melancholy'
+                'Adele', 'Sam Smith', 'Lewis Capaldi', 'Billie Eilish', 'Lorde',
+                'sad songs', 'rainy day', 'melancholy', 'emotional ballads', 'indie sad',
+                'acoustic rain', 'heartbreak songs', 'slow songs', 'piano ballads'
             ],
             drizzle: [
-                'Bon Iver quiet', 'Lana Del Rey rain', 'James Blake acoustic', 'Phoebe Bridgers sad',
-                'acoustic rain songs', 'soft indie music', 'mellow playlist', 'chill sad songs'
+                'Bon Iver', 'Phoebe Bridgers', 'Lana Del Rey', 'Clairo', 'Rex Orange County',
+                'chill indie', 'soft rock', 'bedroom pop', 'lo-fi', 'mellow',
+                'acoustic chill', 'indie folk', 'dreamy pop', 'soft indie'
             ],
             thunderstorm: [
-                'Imagine Dragons thunder', 'Foo Fighters energy', 'Linkin Park storm', 'The Killers electric',
-                'rock anthems', 'intense music', 'high energy rock', 'powerful songs'
+                'Imagine Dragons', 'OneRepublic', 'Maroon 5', 'Coldplay', 'Linkin Park',
+                'epic music', 'powerful songs', 'anthems', 'rock hits', 'intense music',
+                'stadium rock', 'alt rock', 'energetic', 'driving music'
             ],
             snow: [
-                'Bon Iver winter', 'Iron Wine quiet', 'Sufjan Stevens snow', 'Fleet Foxes peaceful',
-                'winter songs', 'peaceful music', 'acoustic winter', 'calm playlist'
+                'Bon Iver', 'Fleet Foxes', 'Iron & Wine', 'The Paper Kites', 'Daughter',
+                'winter songs', 'acoustic folk', 'indie winter', 'peaceful music', 'calm',
+                'ambient folk', 'quiet songs', 'cozy music', 'fireside songs'
             ],
             clouds: [
-                'The National indie', 'Vampire Weekend alternative', 'Tame Impala dreamy', 'Arctic Monkeys chill',
-                'indie rock playlist', 'alternative music', 'thoughtful songs', 'indie hits'
+                'Arctic Monkeys', 'Tame Impala', 'The 1975', 'Vampire Weekend', 'Foster the People',
+                'indie rock', 'alternative', 'modern rock', 'indie pop', 'brit pop',
+                'garage rock', 'indie alternative', 'modern alternative', 'cool indie'
             ],
             mist: [
-                'FKA twigs ethereal', 'James Blake atmospheric', 'Thom Yorke ambient', 'Burial electronic',
-                'ambient electronic', 'atmospheric music', 'dreamy electronic', 'ethereal playlist'
+                'James Blake', 'FKA twigs', 'Thom Yorke', 'Radiohead', 'Massive Attack',
+                'electronic', 'ambient', 'trip hop', 'atmospheric', 'experimental',
+                'downtempo', 'chillwave', 'synth pop', 'dream pop'
             ],
             fog: [
-                'Massive Attack trip hop', 'Portishead atmospheric', 'Bonobo ambient', 'Tycho chill',
-                'trip hop playlist', 'atmospheric electronic', 'ambient music', 'downtempo'
+                'Portishead', 'Bonobo', 'Tycho', 'Burial', 'Four Tet',
+                'ambient electronic', 'chillout', 'lounge', 'minimal', 'soundscapes',
+                'instrumental', 'electronic ambient', 'chill electronic', 'meditation music'
             ]
         };
 
         return searchTerms[weather] || searchTerms.clear;
     }
 
-    // Main recommendation method
+    // Enhanced recommendation method with global market support
     async getRecommendations(weatherMain, limit = 25) {
-        console.log('=== SPOTIFY API 2024 COMPATIBLE PLAYLIST GENERATION ===');
+        console.log('=== ENHANCED GLOBAL PLAYLIST GENERATION ===');
         console.log(`Weather: ${weatherMain}, Requested: ${limit} tracks`);
-        console.log('ℹ️  Note: Post-Nov 2024 API changes may limit preview availability');
         
         try {
             const accessToken = await this.getValidAccessToken();
@@ -280,79 +311,113 @@ export class SpotifyAuth {
 
             console.log('✅ Access token obtained');
 
+            // Get user's market for localized results
+            const userMarket = await this.getUserMarket();
+            console.log(`🌍 User market: ${userMarket}`);
+
             let allTracks = [];
-            const searchTerms = this.getWeatherSearchTerms(weatherMain);
+            const searchTerms = this.getGlobalWeatherSearchTerms(weatherMain);
             
-            // Search with weather-appropriate terms
-            console.log('🎯 Searching with weather-appropriate terms...');
+            console.log('🎯 Starting search with global terms...');
             
-            const tracksPerSearch = Math.ceil(limit * 1.5 / searchTerms.length);
+            // Search with multiple terms across different markets
+            const tracksPerSearch = Math.ceil((limit * 2) / Math.min(searchTerms.length, 8));
             
-            for (const term of searchTerms.slice(0, 6)) { // Limit searches to avoid rate limits
+            for (const term of searchTerms.slice(0, 8)) { // Limit to 8 searches
                 if (allTracks.length >= limit * 2) break;
                 
-                const searchResults = await this.searchTracks(accessToken, term, tracksPerSearch);
-                allTracks.push(...searchResults);
+                const searchResults = await this.searchTracks(accessToken, term, tracksPerSearch, userMarket);
                 
-                // Small delay to avoid rate limiting
-                await new Promise(resolve => setTimeout(resolve, 100));
+                if (searchResults.length > 0) {
+                    allTracks.push(...searchResults);
+                    console.log(`✅ Added ${searchResults.length} tracks from "${term}"`);
+                } else {
+                    console.log(`⚠️ No results for "${term}" - continuing...`);
+                }
+                
+                // Delay to avoid rate limiting
+                await new Promise(resolve => setTimeout(resolve, 150));
             }
             
-            console.log(`📊 Total tracks found: ${allTracks.length}`);
+            console.log(`📊 Total tracks collected: ${allTracks.length}`);
 
-            // Remove duplicates
+            // Enhanced fallback if still no results
+            if (allTracks.length === 0) {
+                console.log('🔄 No results found, trying global fallback...');
+                
+                const globalFallbacks = [
+                    'top 50 global', 'viral 50 global', 'today top hits', 
+                    'global top 50', 'trending music', 'popular music'
+                ];
+                
+                for (const fallback of globalFallbacks) {
+                    const fallbackResults = await this.searchTracks(accessToken, fallback, 20, 'US');
+                    if (fallbackResults.length > 0) {
+                        allTracks.push(...fallbackResults);
+                        console.log(`✅ Fallback success with "${fallback}": ${fallbackResults.length} tracks`);
+                        break;
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                }
+            }
+
+            if (allTracks.length === 0) {
+                throw new Error(`No tracks found for ${weatherMain} weather. This might be due to regional restrictions or temporary API issues. Please try again.`);
+            }
+
+            // Remove duplicates and prepare final list
             const uniqueTracks = this.removeDuplicates(allTracks);
             console.log(`📊 After deduplication: ${uniqueTracks.length} tracks`);
 
-            // Check preview URL availability
-            const tracksWithRealPreviews = uniqueTracks.filter(track => track.has_real_preview);
-            const tracksWithoutPreviews = uniqueTracks.filter(track => !track.has_real_preview);
-            
-            console.log(`🎵 Preview breakdown:`);
-            console.log(`   - With real previews: ${tracksWithRealPreviews.length}`);
-            console.log(`   - Without previews: ${tracksWithoutPreviews.length}`);
+            // Check preview availability
+            const tracksWithPreviews = uniqueTracks.filter(track => track.has_real_preview);
+            console.log(`🎵 Tracks with previews: ${tracksWithPreviews.length}/${uniqueTracks.length}`);
 
-            if (uniqueTracks.length === 0) {
-                throw new Error('No tracks found. Please try again or check your connection.');
-            }
-
-            // Prioritize tracks with real previews, but include others for playlist creation
-            const finalTracks = [
-                ...tracksWithRealPreviews,
-                ...tracksWithoutPreviews
-            ].slice(0, limit);
-
-            // Shuffle the results
-            const shuffledTracks = this.shuffleArray(finalTracks);
+            // Shuffle and return requested amount
+            const shuffledTracks = this.shuffleArray(uniqueTracks).slice(0, limit);
 
             console.log(`🎉 SUCCESS: Returning ${shuffledTracks.length} tracks`);
-            console.log(`🎵 Preview info: ${tracksWithRealPreviews.length} with previews, ${tracksWithoutPreviews.length} without`);
-            
-            // Show sample tracks
-            console.log('🎵 Sample tracks:');
-            shuffledTracks.slice(0, 3).forEach((track, i) => {
-                const previewStatus = track.has_real_preview ? '🎵' : '🔇';
-                console.log(`${i + 1}. ${previewStatus} ${track.name} by ${track.artists[0].name}`);
-            });
+            console.log(`🌍 Markets used: ${[...new Set(shuffledTracks.map(t => t.search_market))].join(', ')}`);
 
             return shuffledTracks;
 
         } catch (error) {
             console.error('💥 Playlist generation failed:', error);
+            
+            // Enhanced error messaging
+            if (error.message.includes('403') || error.message.includes('Forbidden')) {
+                throw new Error('Access denied - this might be due to geographic restrictions. Please try logging out and back in.');
+            } else if (error.message.includes('429') || error.message.includes('rate limit')) {
+                throw new Error('Too many requests - please wait a moment and try again.');
+            } else if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+                throw new Error('Authentication expired - please log out and back in.');
+            }
+            
             throw error;
         }
     }
 
-    // Simple duplicate removal
+    // Enhanced duplicate removal with better matching
     removeDuplicates(tracks) {
         const seen = new Set();
+        const seenCombos = new Set();
+        
         return tracks.filter(track => {
             if (!track || !track.id) return false;
             
+            // Remove exact duplicates by ID
             if (seen.has(track.id)) {
                 return false;
             }
             seen.add(track.id);
+            
+            // Remove near-duplicates by artist + track name combination
+            const combo = `${track.artists[0]?.name?.toLowerCase()}-${track.name?.toLowerCase()}`;
+            if (seenCombos.has(combo)) {
+                return false;
+            }
+            seenCombos.add(combo);
+            
             return true;
         });
     }
@@ -365,51 +430,6 @@ export class SpotifyAuth {
             [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
         }
         return shuffled;
-    }
-
-    // Debug method
-    async debugAuthStatus() {
-        console.log('=== DEBUGGING SPOTIFY AUTH ===');
-        
-        const accessToken = localStorage.getItem('access_token');
-        const refreshToken = localStorage.getItem('refresh_token');
-        const expiresAt = localStorage.getItem('token_expires_at');
-        
-        console.log('Stored access token exists:', !!accessToken);
-        console.log('Stored refresh token exists:', !!refreshToken);
-        console.log('Token expires at:', expiresAt);
-        console.log('Current time:', Date.now());
-        console.log('Token expired:', expiresAt ? Date.now() > parseInt(expiresAt) : 'No expiry time');
-        
-        if (accessToken) {
-            try {
-                const response = await fetch('https://api.spotify.com/v1/me', {
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                console.log('Token test response status:', response.status);
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('Token is valid! User:', data.display_name || data.id);
-                    console.log('User country:', data.country);
-                } else {
-                    const errorText = await response.text();
-                    console.error('Token test failed:', errorText);
-                }
-            } catch (error) {
-                console.error('Token test error:', error);
-            }
-        }
-        
-        return {
-            hasAccessToken: !!accessToken,
-            hasRefreshToken: !!refreshToken,
-            tokenExpired: expiresAt ? Date.now() > parseInt(expiresAt) : null,
-            isLoggedIn: this.isLoggedIn()
-        };
     }
 
     async getUserProfile() {
