@@ -1,6 +1,3 @@
-/* ============ APP.CSS - New Layout Structure ============ */
-
-/* Main app container with new layout */
 .app-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -11,7 +8,6 @@
   min-height: 100vh;
 }
 
-/* Header layout - title centered, button right */
 .header-section {
   display: flex;
   align-items: center;
@@ -49,7 +45,6 @@
   justify-content: flex-end;
 }
 
-/* Weather card with animated backgrounds */
 .weather-section {
   width: 100%;
   position: relative;
@@ -59,7 +54,6 @@
   transition: all 1s ease-in-out;
 }
 
-/* Weather content wrapper */
 .weather-content {
   position: relative;
   z-index: 2;
@@ -67,7 +61,6 @@
   background: transparent;
 }
 
-/* Bottom section with playlist and settings */
 .bottom-section {
   display: grid;
   gap: 24px;
@@ -82,8 +75,6 @@
   width: 100%;
 }
 
-/* ============ WEATHER ANIMATED BACKGROUNDS ============ */
-
 .weather-background {
   position: absolute;
   top: 0;
@@ -95,7 +86,6 @@
   pointer-events: none;
 }
 
-/* Rain Animation */
 .weather-rain .weather-background {
   background: linear-gradient(transparent, transparent 80%, rgba(100, 149, 237, 0.1) 80%);
   background-size: 2px 15px;
@@ -107,7 +97,6 @@
   100% { background-position: 0% 100%; }
 }
 
-/* Snow Animation */
 .weather-snow .weather-background {
   background: 
     radial-gradient(2px 2px at 20% 30%, white, transparent),
@@ -123,7 +112,6 @@
   100% { background-position: 50px 50px, 60px 60px, 40px 40px, 80px 80px; }
 }
 
-/* Sunny Animation */
 .weather-clear-day .weather-background {
   background: 
     radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.3) 20%, transparent 20%),
@@ -137,7 +125,6 @@
   100% { transform: rotate(360deg); }
 }
 
-/* Night/Stars Animation */
 .weather-clear-night .weather-background {
   background: 
     radial-gradient(1px 1px at 20% 30%, white, transparent),
@@ -153,7 +140,6 @@
   50% { opacity: 0.6; }
 }
 
-/* Cloudy Animation */
 .weather-clouds .weather-background {
   background: 
     radial-gradient(ellipse 100px 30px at 20% 50%, rgba(200, 200, 200, 0.3), transparent),
@@ -168,7 +154,6 @@
   100% { background-position: calc(100% + 100px) 0%, calc(100% + 80px) 0%, calc(100% + 120px) 0%; }
 }
 
-/* Thunderstorm Animation */
 .weather-thunderstorm .weather-background {
   background: 
     linear-gradient(transparent, transparent 80%, rgba(100, 149, 237, 0.2) 80%),
@@ -183,7 +168,6 @@
   2%, 4% { opacity: 0.5; }
 }
 
-/* Mist/Fog Animation */
 .weather-mist .weather-background,
 .weather-fog .weather-background {
   background: 
@@ -199,7 +183,6 @@
   50% { background-position: 50px 0%, -30px 0%, 30px 0%; }
 }
 
-/* Windy/Dust Animation */
 .weather-dust .weather-background,
 .weather-haze .weather-background,
 .weather-smoke .weather-background {
@@ -215,7 +198,7 @@
   100% { background-position: 100% 100%, -100% 100%; }
 }
 
-/* Drizzle Animation */
+
 .weather-drizzle .weather-background {
   background: 
     radial-gradient(1px 1px at 20% 30%, rgba(100, 149, 237, 0.2), transparent),
@@ -230,7 +213,6 @@
   100% { background-position: 30px 30px, 40px 40px, 35px 35px; }
 }
 
-/* Ash/Tornado Animation */
 .weather-ash .weather-background,
 .weather-tornado .weather-background {
   background: 
@@ -244,8 +226,6 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-
-/* ============ RESPONSIVE LAYOUT ============ */
 
 @media (min-width: 768px) {
   .bottom-section {
@@ -261,8 +241,6 @@
     grid-area: settings;
   }
 }
-
-/* ============ LOADING STATES ============ */
 
 .loading-container {
   display: flex;
@@ -297,8 +275,6 @@
   font-size: 0.9rem;
   opacity: 0.7;
 }
-
-/* ============ ERROR STATES ============ */
 
 .error-container {
   display: flex;
@@ -346,9 +322,7 @@
   box-shadow: 0 8px 30px rgba(139, 92, 246, 0.4);
 }
 
-/* ============ GLOBAL COMPONENT THEMING ============ */
 
-/* Apply theme colors to all major components */
 .header-section,
 .weather-info-section,
 .card-container,
@@ -360,7 +334,6 @@
   transition: all 1s ease-in-out;
 }
 
-/* Apply theme text colors globally */
 .header-title h1,
 .city,
 .card-header,
@@ -383,8 +356,6 @@
   transition: color 1s ease-in-out;
 }
 
-/* ============ ANIMATION UTILITIES ============ */
-
 .fade-in {
   animation: fadeIn 0.5s ease-in;
 }
@@ -399,7 +370,6 @@
   to { transform: rotate(360deg); }
 }
 
-/* Theme indicator */
 .theme-indicator {
   position: fixed;
   top: 10px;
@@ -419,8 +389,6 @@
   background: rgba(0, 0, 0, 0.9);
   transform: scale(1.05);
 }
-
-/* ============ RESPONSIVE DESIGN ============ */
 
 @media (max-width: 768px) {
   .header-section {
@@ -472,8 +440,6 @@
   }
 }
 
-/* ============ ACCESSIBILITY ============ */
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -498,3 +464,4 @@
     background: rgba(0, 0, 0, 0.8) !important;
   }
 }
+

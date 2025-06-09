@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Shuffle, Music, Loader, Play, Pause, Volume2, VolumeX } from 'lucide-react';
+import { Shuffle, Music, Loader, ExternalLink, Info, AlertTriangle, RefreshCw } from 'lucide-react';
 import { SpotifyAuth } from "../services/api";
 import '../CSS/Playlists.css';
 
@@ -10,217 +10,103 @@ function Playlists({ weatherData, playlistSettings }){
     const [playlistCreated, setPlaylistCreated] = useState(false);
     const [spotifyAuth] = useState(new SpotifyAuth());
     const [creatingSpotifyPlaylist, setCreatingSpotifyPlaylist] = useState(false);
-    const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
-    const [tracksPerPage] = useState(5);
-    const [currentAudio, setCurrentAudio] = useState(null);
-    const [currentTime, setCurrentTime] = useState(0);
-    const [duration, setDuration] = useState(30);
-    const [volume, setVolume] = useState(0.5);
+    const [tracksPerPage] = useState(6);
 
     const {
         name: cityName,
         weather: [{ main }]
-    } = weatherData;
+    } = weatherData || { name: 'Unknown', weather: [{ main: 'Clear' }] };
 
     const weatherMain = main;
-    const playlistLength = playlistSettings.playlistLength || 30;
-    const allowExplicit = playlistSettings.isExplicit === true;
+    const playlistLength = playlistSettings?.playlistLength || 30;
+    const allowExplicit = playlistSettings?.isExplicit === true;
 
     const totalPages = Math.ceil(tracks.length / tracksPerPage);
     const startIndex = (currentPage - 1) * tracksPerPage;
     const endIndex = startIndex + tracksPerPage;
     const currentTracks = tracks.slice(startIndex, endIndex);
 
-    useEffect(() => {
-        return () => {
-            if (currentAudio) {
-                currentAudio.pause();
-                currentAudio.src = '';
-            }
-            setCurrentlyPlaying(null);
-        };
-    }, [currentAudio]);
-
-    const handlePlay = async (track) => {
-        if (!track.preview_url) {
-            setError('No preview available for this track');
-            return;
-        }
-        if (currentAudio) {
-            currentAudio.pause();
-            currentAudio.src = '';
-        }
-        try {
-            const audio = new Audio(track.preview_url);
-            audio.volume = volume;
-
-            audio.addEventListener('timeupdate', () => {
-                setCurrentTime(audio.currentTime);
-            });
-
-            audio.addEventListener('loadedmetadata', () => {
-                setDuration(audio.duration || 30);
-            });
-
-            audio.addEventListener('ended', () => {
-                setCurrentlyPlaying(null);
-                setCurrentTime(0);
-            });
-
-            await audio.play();
-            setCurrentAudio(audio);
-            setCurrentlyPlaying(track.id);
-        } catch (error) {
-            console.error('Failed to play audio:', error);
-            alert('Failed to play preview');
-        }
-    };
-
-    const handlePause = () => {
-        if (currentAudio) {
-            currentAudio.pause();
-        }
-        setCurrentlyPlaying(null);
-    };
-
-    const handleVolumeChange = (newVolume) => {
-        setVolume(newVolume);
-        if (currentAudio) {
-            currentAudio.volume = newVolume;
-        }
-    };
-
-    const formatTime = (time) => {
-        const minutes = Math.floor(time / 60);
-        const seconds = Math.floor(time % 60);
-        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-    };
-
-    // ENHANCED: Smart playlist generation with multiple attempts
+    // Generate playlist using updated API
     const generatePlaylist = async () => {
-        const authStatus = await spotifyAuth.debugAuthStatus();
-        console.log('Auth status:', authStatus);
-
-        if (!weatherData) {
-            setError('Weather Data not available');
-            return;
-        }
-        if (!spotifyAuth.isLoggedIn()) {
-            setError('Please log into Spotify first');
-            return;
-        }
+        console.log('🚀 Generate playlist button clicked!');
         
-        setLoading(true);
-        setError(null);
-        setPlaylistCreated(false);
-        setTracks([]);
-
-        if (currentAudio) {
-            currentAudio.pause();
-            currentAudio.src = '';
-        }
-        setCurrentlyPlaying(null);
-
         try {
-            console.log('Generating playlist for weather:', weatherMain, 'with', playlistLength, 'songs');
+            console.log('📊 Checking prerequisites...');
             
-            let allTracks = [];
-            let attempts = 0;
-            const maxAttempts = 3;
-            
-            // SMART FETCHING: Request more tracks to account for filtering
-            while (allTracks.length < playlistLength && attempts < maxAttempts) {
-                attempts++;
-                
-                // Calculate how many more tracks we need
-                const tracksNeeded = playlistLength - allTracks.length;
-                
-                // Request 50% more than needed to account for filtering
-                const requestAmount = Math.min(50, Math.ceil(tracksNeeded * 1.5));
-                
-                console.log(`Attempt ${attempts}: Requesting ${requestAmount} tracks (need ${tracksNeeded} more)`);
-                
-                const recommendedTracks = await spotifyAuth.getRecommendations(
-                    weatherMain, 
-                    requestAmount,
-                    allTracks.length > 0 ? allTracks[allTracks.length - 1].id : null // Use last track as seed for variety
-                );
-
-                if (!recommendedTracks || recommendedTracks.length === 0) {
-                    if (attempts === 1) {
-                        throw new Error('No tracks found for this weather condition');
-                    }
-                    break; // Try with what we have
-                }
-
-                // Filter out explicit content if needed
-                let filteredTracks = recommendedTracks;
-                if (!allowExplicit) {
-                    filteredTracks = recommendedTracks.filter(track => !track.explicit);
-                }
-
-                // Remove duplicates by track ID
-                const existingIds = new Set(allTracks.map(track => track.id));
-                const newTracks = filteredTracks.filter(track => !existingIds.has(track.id));
-
-                allTracks = [...allTracks, ...newTracks];
-                
-                console.log(`Got ${newTracks.length} new tracks, total: ${allTracks.length}/${playlistLength}`);
-                
-                // If we got very few new tracks, break to avoid infinite loop
-                if (newTracks.length < 2 && attempts > 1) {
-                    console.log('ot getting enough new tracks');
-                    break;
-                }
-            }
-
-            // Trim to exact requested length
-            const finalTracks = allTracks.slice(0, playlistLength);
-
-            if (finalTracks.length === 0) {
-                if (!allowExplicit) {
-                    setError('No non-explicit tracks found for this weather condition');
-                } else {
-                    setError('No tracks found for this weather condition');
-                }
+            if (!weatherData) {
+                console.error('❌ No weather data available');
+                setError('Weather data not available - please refresh the page');
                 return;
             }
 
-            setTracks(finalTracks);
+            // Check environment variables
+            console.log('🔧 Checking environment variables...');
+            const spotifyKey = import.meta.env.VITE_SPOTIFY_API_KEY;
+            console.log('Spotify API key exists:', !!spotifyKey);
+
+            if (!spotifyKey) {
+                console.error('❌ Spotify API key missing');
+                setError('Spotify API key not configured - please contact support');
+                return;
+            }
+
+            console.log('⏳ Setting loading state...');
+            setLoading(true);
+            setError(null);
+            setPlaylistCreated(false);
+            setTracks([]);
+
+            console.log('🎵 Calling getRecommendations...');
+            console.log('Parameters:', { weatherMain, playlistLength });
+            
+            const recommendedTracks = await spotifyAuth.getRecommendations(weatherMain, playlistLength, allowExplicit);
+            
+            console.log('✅ Recommendations received:', recommendedTracks);
+            console.log('Number of tracks:', recommendedTracks?.length || 0);
+
+            if (!recommendedTracks || recommendedTracks.length === 0) {
+                console.error('❌ No tracks in recommendations');
+                throw new Error('Unable to generate playlist. This may be due to Spotify API restrictions or regional limitations. Please try again.');
+            }
+
+            console.log('🔍 Filtering explicit content...');
+            let filteredTracks = recommendedTracks;
+            // Note: Filtering is now done in the API method itself for better track count management
+            
+            if (filteredTracks.length === 0) {
+                console.error('❌ No tracks after filtering');
+                setError('No tracks found for this weather condition. Try enabling explicit content in settings.');
+                return;
+            }
+
+            console.log('✅ Setting final tracks...');
+            setTracks(filteredTracks);
             setPlaylistCreated(true);
             
-            // Show info about track availability
-            const tracksWithPreviews = finalTracks.filter(track => track.preview_url).length;
-            const tracksWithoutPreviews = finalTracks.length - tracksWithPreviews;
-            
-            console.log(`Successfully generated playlist with ${finalTracks.length} tracks`);
-            console.log(`${tracksWithPreviews} tracks have previews, ${tracksWithoutPreviews} don't`);
-            
-            if (tracksWithoutPreviews > 0) {
-                setError(`Generated ${finalTracks.length} tracks (${tracksWithoutPreviews} without preview)`);
-            }
+            console.log(`🎉 SUCCESS: Generated ${filteredTracks.length} tracks`);
 
         } catch (error) {
-            console.log('Error generating playlist:', error);
+            console.error('💥 Playlist generation error:', error);
 
-            if (error.message.includes('Authentication required') ||
-                error.message.includes('token expired')) {
-                setError('Please log into Spotify again');
+            if (error.message.includes('Client ID not configured')) {
+                setError('Spotify API not configured properly - please contact support');
+            } else if (error.message.includes('rate limit') || error.message.includes('429')) {
+                setError('⚠️ Rate limited by Spotify - please wait 30 seconds and try again');
+            } else if (error.message.includes('401') || error.message.includes('403')) {
+                setError('⚠️ Spotify access denied - this may be due to regional restrictions or API limitations');
+            } else if (error.message.includes('regional limitations')) {
+                setError('⚠️ Regional limitations detected. Trying different markets may help - please try regenerating.');
             } else {
-                setError(error.message || 'Failed to generate playlist');
+                setError(error.message || 'Failed to generate playlist. Please try again.');
             }
         } finally {
+            console.log('🔄 Clearing loading state...');
             setLoading(false);
         }
     };
 
     const goToPage = (pageNumber) => {
-        // Stop audio when changing pages
-        if (currentAudio) {
-            currentAudio.pause();
-        }
-        setCurrentlyPlaying(null);
         setCurrentPage(pageNumber);
     };
 
@@ -244,6 +130,14 @@ function Playlists({ weatherData, playlistSettings }){
     };
 
     const createSpotifyPlaylist = async () => {
+        console.log('🎵 Create Spotify playlist clicked');
+        
+        // Check if user is logged in for playlist creation
+        if (!spotifyAuth.isLoggedIn()) {
+            setError('To save playlists to Spotify, please log in with your Spotify account first');
+            return;
+        }
+        
         if (!tracks || tracks.length === 0) {
             setError('No tracks to add to playlist');
             return;
@@ -253,30 +147,48 @@ function Playlists({ weatherData, playlistSettings }){
         setError(null);
 
         try {
+            console.log('👤 Getting user profile...');
             const user = await spotifyAuth.getUserProfile();
+            console.log('User profile:', user);
             
+            console.log('📝 Creating playlist...');
             const playlist = await spotifyAuth.createPlaylist(
                 user.id,
                 `${cityName} - ${weatherMain} Vibes`,
-                `Perfect playlist for ${weatherMain.toLowerCase()} weather in ${cityName}. Generated with ${tracks.length} tracks.`,
+                `Perfect playlist for ${weatherMain.toLowerCase()} weather in ${cityName}. Generated with ${tracks.length} tracks using WeatherBeats (Post-Nov 2024 API).`,
                 false
             );
+            
+            console.log('Playlist created:', playlist);
 
+            console.log('➕ Adding tracks to playlist...');
             const trackUris = tracks.map(track => track.uri);
+            
             await spotifyAuth.addTracksToPlaylist(playlist.id, trackUris);
 
-            alert(`Playlist created successfully! Check your Spotify app.`);
+            alert(`Playlist "${playlist.name}" created successfully! Check your Spotify app.`);
             
             if (playlist.external_urls?.spotify) {
                 window.open(playlist.external_urls.spotify, '_blank');
             }
 
         } catch (error) {
-            console.error('Error creating Spotify playlist:', error);
-            setError('Failed to create Spotify playlist: ' + error.message);
+            console.error('💥 Error creating Spotify playlist:', error);
+            
+            if (error.message.includes('Authentication required')) {
+                setError('Please log into Spotify to save playlists to your account');
+            } else {
+                setError('Failed to create Spotify playlist: ' + error.message);
+            }
         } finally {
             setCreatingSpotifyPlaylist(false);
         }
+    };
+
+    const formatDuration = (durationMs) => {
+        const minutes = Math.floor(durationMs / 60000);
+        const seconds = ((durationMs % 60000) / 1000).toFixed(0);
+        return `${minutes}:${seconds.padStart(2, '0')}`;
     };
 
     return (
@@ -285,7 +197,6 @@ function Playlists({ weatherData, playlistSettings }){
                 <h2>Your Weather Playlist</h2>
             </div>
             
-            {/* Generate button - only show when no playlist is created */}
             {!playlistCreated && (
                 <div>
                     <p>
@@ -302,43 +213,22 @@ function Playlists({ weatherData, playlistSettings }){
                                 Generating...
                             </>
                         ) : (
-                            'Generate playlist'
+                            <>
+                                <Music size={16} />
+                                Generate playlist
+                            </>
                         )}
                     </button>
                 </div>
             )}
 
-            {/* Only show playlist content when playlist is created */}
             {playlistCreated && tracks.length > 0 && (
                 <div className="playlist-results">
                     <h3>Generated Playlist ({tracks.length} tracks)</h3>
                     
-                    {/* Global Volume Control */}
-                    <div className="global-controls">
-                        <Volume2 size={16} />
-                        <input
-                            type="range"
-                            min="0"
-                            max="1"
-                            step="0.1"
-                            value={volume}
-                            onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-                            style={{ width: '100px' }}
-                        />
-                        <span>{Math.round(volume * 100)}%</span>
-                        {currentlyPlaying && (
-                            <button onClick={handlePause} style={{ marginLeft: '10px' }}>
-                                Stop All
-                            </button>
-                        )}
-                    </div>
-
                     {/* Track List */}
                     <div className="track-list">
                         {currentTracks.map((track, index) => {
-                            const isPlaying = currentlyPlaying === track.id;
-                            const progressPercent = isPlaying && duration > 0 ? (currentTime / duration) * 100 : 0;
-                            
                             return (
                                 <div key={track.id} className="track-item">
                                     <div className="track-info-row">
@@ -346,36 +236,36 @@ function Playlists({ weatherData, playlistSettings }){
                                             {startIndex + index + 1}.
                                         </span>
                                         
-                                        {/* Album Art */}
                                         <img 
                                             src={track.album.images?.[2]?.url || track.album.images?.[0]?.url} 
                                             alt={`${track.album.name} cover`}
-                                            width="40"
-                                            height="40"
-                                            style={{ borderRadius: '4px', marginRight: '10px' }}
+                                            width="50"
+                                            height="50"
+                                            className="album-art"
                                             onError={(e) => {
-                                                e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xNSAxNUgyNVYyNUgyNVYxNVpNMTcgMjNWMThIMTlWMjBIMjJWMjJIMTlWMjNIMTdaIiBmaWxsPSIjOUI5QjlCIi8+Cjwvc3ZnPgo=';
+                                                e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMCAyMEgzMFYzMEgzMFYyMFpNMjIgMjhWMjNIMjRWMjVIMjdWMjdIMjRWMjhIMjJaIiBmaWxsPSIjOUI5QjlCIi8+Cjwvc3ZnPgo=';
                                             }}
                                         />
                                         
                                         <div className="track-details">
-                                            <div className="track-name">{track.name}</div>
+                                            <div className="track-name">
+                                                {track.name}
+                                                {track.explicit && <span className="explicit-badge">E</span>}
+                                            </div>
                                             <div className="track-artist">
                                                 {track.artists.map(artist => artist.name).join(', ')}
                                             </div>
+                                            <div className="track-album">
+                                                {track.album.name}
+                                            </div>
                                         </div>
 
-                                        {/* Play/Pause Button */}
-                                        <button
-                                            onClick={isPlaying ? handlePause : () => handlePlay(track)}
-                                            disabled={!track.preview_url}
-                                            className="play-btn"
-                                            title={!track.preview_url ? 'No preview available' : (isPlaying ? 'Pause' : 'Play preview')}
-                                        >
-                                            {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-                                        </button>
+                                        <div className="track-meta">
+                                            <span className="track-duration">
+                                                {formatDuration(track.duration_ms)}
+                                            </span>
+                                        </div>
 
-                                        {/* Spotify Link */}
                                         <a 
                                             href={track.external_urls.spotify} 
                                             target="_blank" 
@@ -383,40 +273,9 @@ function Playlists({ weatherData, playlistSettings }){
                                             className="spotify-link"
                                             title="Open in Spotify"
                                         >
-                                            <Music size={16} />
+                                            <ExternalLink size={20} />
                                         </a>
                                     </div>
-
-                                    {/* Progress Bar (only show when playing) */}
-                                    {isPlaying && track.preview_url && (
-                                        <div className="progress-container">
-                                            <div className="progress-bar">
-                                                <div 
-                                                    className="progress-fill"
-                                                    style={{ 
-                                                        width: `${progressPercent}%`,
-                                                        height: '4px',
-                                                        backgroundColor: '#1db954',
-                                                        borderRadius: '2px',
-                                                        transition: 'width 0.1s'
-                                                    }}
-                                                />
-                                            </div>
-                                            <div className="time-display">
-                                                <span>{formatTime(currentTime)}</span>
-                                                <span>Preview</span>
-                                                <span>{formatTime(duration)}</span>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* No Preview Message */}
-                                    {!track.preview_url && (
-                                        <div className="no-preview">
-                                            <VolumeX size={12}/>
-                                            <span>No preview available</span>
-                                        </div>
-                                    )}
                                 </div>
                             );
                         })}
@@ -442,10 +301,11 @@ function Playlists({ weatherData, playlistSettings }){
                         <button 
                             onClick={createSpotifyPlaylist}
                             disabled={creatingSpotifyPlaylist}
+                            className="save-to-spotify-btn"
                         >
                             {creatingSpotifyPlaylist ? (
                                 <>
-                                    <Loader />
+                                    <Loader className="loading-spinner" />
                                     Creating...
                                 </>
                             ) : (
@@ -467,16 +327,18 @@ function Playlists({ weatherData, playlistSettings }){
                                     Generating...
                                 </>
                             ) : (
-                                'Regenerate playlist'
+                                <>
+                                    <RefreshCw size={16} />
+                                    Regenerate playlist
+                                </>
                             )}
                         </button>
                     </div>
                 </div>
             )}
 
-            {/* Error Display */}
             {error && (
-                <div style={{ color: 'red', marginTop: '1rem' }}>
+                <div className={`error-message ${error.includes('✅') ? 'success-info' : 'error-info'}`}>
                     {error}
                 </div>
             )}
@@ -484,4 +346,4 @@ function Playlists({ weatherData, playlistSettings }){
     );
 }
 
-export default Playlists
+export default Playlists;

@@ -1,24 +1,17 @@
-/* ============ HEADER.CSS - Updated for New Layout ============ */
-
-/* Remove container styling since it's handled by App.css */
 .header-container {
-  /* No background, padding, or positioning - handled by parent */
-  display: contents; /* This makes the header transparent to layout */
+  display: contents; 
 }
 
 .header {
-  /* Title styling removed - handled by App.css .header-title */
-  display: none; /* Hide this since title is now in App.jsx */
+  display: none; 
 }
 
-/* Button container */
 .btn-container {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Spotify Connection Buttons */
 .btn-connected,
 .btn-disconnected {
   padding: 12px 24px;
@@ -59,7 +52,6 @@
   transform: translateY(0);
 }
 
-/* Add ripple effect */
 .btn-connected::after,
 .btn-disconnected::after {
   content: '';
@@ -80,8 +72,6 @@
   height: 300px;
 }
 
-/* ============ RESPONSIVE HEADER ============ */
-
 @media (max-width: 768px) {
   .btn-connected,
   .btn-disconnected {
@@ -98,9 +88,6 @@
   }
 }
 
-/* ============ THEME-SPECIFIC BUTTON EFFECTS ============ */
-
-/* Energetic mood - button bounces */
 [data-mood="energetic"] .btn-connected,
 [data-mood="energetic"] .btn-disconnected {
   animation: button-bounce 3s ease-in-out infinite;
@@ -111,13 +98,11 @@
   50% { transform: translateY(-2px); }
 }
 
-/* Intense mood - dramatic glow */
 [data-mood="intense"] .btn-connected,
 [data-mood="intense"] .btn-disconnected {
   box-shadow: 0 4px 20px var(--theme-accent), 0 0 30px var(--theme-accent);
 }
 
-/* Dreamy mood - gentle glow */
 [data-mood="dreamy"] .btn-connected,
 [data-mood="dreamy"] .btn-disconnected {
   animation: dreamy-button-glow 4s ease-in-out infinite;
@@ -128,7 +113,6 @@
   50% { filter: brightness(1.2); }
 }
 
-/* Mysterious mood - fade in/out */
 [data-mood="mysterious"] .btn-connected,
 [data-mood="mysterious"] .btn-disconnected {
   animation: mysterious-button-fade 6s ease-in-out infinite;
@@ -139,7 +123,6 @@
   50% { opacity: 0.8; }
 }
 
-/* Chaotic mood - random movements */
 [data-mood="chaotic"] .btn-connected,
 [data-mood="chaotic"] .btn-disconnected {
   animation: chaotic-button-wiggle 2s ease-in-out infinite;

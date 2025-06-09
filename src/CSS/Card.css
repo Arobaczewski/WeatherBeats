@@ -1,5 +1,3 @@
-/* ============ CARD.CSS - Music Card Component Styles ============ */
-
 .card-container {
   grid-area: card;
   background: var(--theme-card-bg, rgba(255, 255, 255, 0.15));
@@ -17,7 +15,6 @@
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
-/* Card Header */
 .card-header {
   font-size: 1.8rem;
   font-weight: 700;
@@ -27,7 +24,6 @@
   transition: color 1s ease-in-out;
 }
 
-/* Card Description Text */
 .card-container p {
   color: var(--theme-text-secondary, rgba(255, 255, 255, 0.9));
   font-size: 1rem;
@@ -36,7 +32,6 @@
   transition: color 1s ease-in-out;
 }
 
-/* Music Style Tags */
 .music-style-tag {
   display: inline-block;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
@@ -62,8 +57,6 @@
 .music-style-tag:active {
   transform: translateY(0);
 }
-
-/* ============ RESPONSIVE MUSIC CARD ============ */
 
 @media (max-width: 768px) {
   .card-container {
@@ -102,9 +95,6 @@
   }
 }
 
-/* ============ THEME-SPECIFIC MUSIC CARD EFFECTS ============ */
-
-/* Energetic mood - bouncing tags */
 [data-mood="energetic"] .music-style-tag {
   animation: tag-bounce 2s ease-in-out infinite;
 }
@@ -114,7 +104,6 @@
   50% { transform: scale(1.05); }
 }
 
-/* Contemplative mood - gentle breathing */
 [data-mood="contemplative"] .card-container {
   animation: contemplative-breath 6s ease-in-out infinite;
 }
@@ -124,7 +113,6 @@
   50% { transform: scale(1.01); }
 }
 
-/* Intense mood - pulsing glow */
 [data-mood="intense"] .music-style-tag {
   animation: intense-glow 1.5s ease-in-out infinite;
 }
@@ -134,7 +122,6 @@
   50% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.4); }
 }
 
-/* Peaceful mood - soft float */
 [data-mood="peaceful"] .music-style-tag {
   animation: peaceful-float 4s ease-in-out infinite;
 }
@@ -144,7 +131,6 @@
   50% { transform: translateY(-2px); }
 }
 
-/* Dreamy mood - color shift */
 [data-mood="dreamy"] .music-style-tag {
   animation: dreamy-colors 8s ease-in-out infinite;
 }
@@ -155,7 +141,6 @@
   66% { filter: hue-rotate(-10deg); }
 }
 
-/* Ethereal mood - soft glow */
 [data-mood="ethereal"] .card-container {
   animation: ethereal-glow 5s ease-in-out infinite;
 }
@@ -165,7 +150,6 @@
   50% { filter: brightness(1.1); }
 }
 
-/* Gritty mood - rough edges */
 [data-mood="gritty"] .music-style-tag {
   animation: gritty-shake 3s ease-in-out infinite;
 }
@@ -176,7 +160,6 @@
   75% { transform: rotate(-0.3deg); }
 }
 
-/* Rugged mood - steady pulse */
 [data-mood="rugged"] .card-header {
   animation: rugged-pulse 3s ease-in-out infinite;
 }
@@ -186,7 +169,6 @@
   50% { text-shadow: 0 2px 15px rgba(0, 0, 0, 0.4); }
 }
 
-/* Chaotic mood - random movements */
 [data-mood="chaotic"] .music-style-tag {
   animation: chaotic-dance 2s ease-in-out infinite;
 }
@@ -198,7 +180,6 @@
   75% { transform: rotate(0.5deg) scale(1.01); }
 }
 
-/* Mysterious mood - fade in/out */
 [data-mood="mysterious"] .music-style-tag {
   animation: mysterious-fade 4s ease-in-out infinite;
 }
@@ -208,7 +189,6 @@
   50% { opacity: 0.7; }
 }
 
-/* Ominous mood - dark pulsing */
 [data-mood="ominous"] .card-container {
   animation: ominous-pulse 3s ease-in-out infinite;
 }
@@ -218,7 +198,6 @@
   50% { border-color: rgba(245, 101, 101, 0.4); }
 }
 
-/* Romantic mood - gentle sway */
 [data-mood="romantic"] .music-style-tag {
   animation: romantic-sway 6s ease-in-out infinite;
 }
@@ -229,7 +208,6 @@
   75% { transform: rotate(-0.5deg); }
 }
 
-/* Gentle mood - soft movement */
 [data-mood="gentle"] .card-container {
   animation: gentle-motion 7s ease-in-out infinite;
 }
@@ -239,9 +217,6 @@
   50% { transform: translateX(2px); }
 }
 
-/* ============ MUSIC TAG INTERACTIONS ============ */
-
-/* Add stagger effect for multiple tags */
 .music-style-tag:nth-child(1) { animation-delay: 0s; }
 .music-style-tag:nth-child(2) { animation-delay: 0.1s; }
 .music-style-tag:nth-child(3) { animation-delay: 0.2s; }
@@ -249,13 +224,11 @@
 .music-style-tag:nth-child(5) { animation-delay: 0.4s; }
 .music-style-tag:nth-child(6) { animation-delay: 0.5s; }
 
-/* Enhanced hover effects for tags */
 .music-style-tag:hover {
   animation-play-state: paused;
   transform: translateY(-3px) scale(1.05);
 }
 
-/* Focus states for accessibility */
 .music-style-tag:focus {
   outline: 2px solid var(--theme-accent);
   outline-offset: 2px;

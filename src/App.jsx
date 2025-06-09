@@ -17,20 +17,18 @@ function App() {
     isExplicit: false
   });
 
-  // Theme hook called at top level - ALWAYS executes
+
   const currentTheme = useWeatherTheme(weatherData);
 
   const updateSettings = (newSettings) => {
     setPlaylistSettings(newSettings);
   };
 
-  // Theme useEffect BEFORE early returns - ALWAYS executes
   useEffect(() => {
     if (currentTheme) {
       // Add smooth transition
       document.body.style.transition = 'all 1s ease-in-out';
       
-      // Log theme change for debugging
       console.log(`🌤️ Weather theme changed to: ${currentTheme.name} (${currentTheme.mood} mood)`);
     }
   }, [currentTheme]);
@@ -107,7 +105,6 @@ function App() {
     return `weather-${weatherMain}`;
   };
 
-  // IMPROVED loading state with proper CSS classes
   if (loading) {
     return (
       <div className="loading-container">
@@ -118,7 +115,6 @@ function App() {
     );
   }
 
-  // IMPROVED error state with retry functionality
   if (error) {
     return (
       <div className="error-container">
@@ -138,7 +134,6 @@ function App() {
     );
   }
 
-  // Don't render main app until we have weather data
   if (!weatherData) {
     return (
       <div className="loading-container">
@@ -149,10 +144,8 @@ function App() {
     );
   }
 
-  // Main app render with new layout structure
   return (
     <div className="app-container fade-in">
-      {/* Debug theme indicator */}
       {currentTheme && process.env.NODE_ENV === 'development' && (
         <div className="theme-indicator">
           <small>
@@ -162,25 +155,20 @@ function App() {
         </div>
       )}
 
-      {/* Header Section - Title centered, Spotify button right */}
       <div className="header-section">
         <div className="header-title">
-          <h1>WeatherBeatz</h1>
+          <h1>WeatherBeats</h1>
         </div>
         <div className="header-actions">
           <Header />
         </div>
       </div>
-
-      {/* Weather Section with Animated Background - includes Music Card */}
       <div className={`weather-section ${getWeatherClass()}`}>
         <div className="weather-background"></div>
         <div className="weather-content">
           <Weather weatherData={weatherData} />
         </div>
       </div>
-
-      {/* Bottom Section - Playlist and Settings */}
       <div className="bottom-section">
         <div className="playlist-section">
           <Playlists 

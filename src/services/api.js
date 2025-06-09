@@ -1,9 +1,12 @@
-// Spotify API - Optimized for Global Users and Regional Restrictions
+// Updated Spotify API for post-November 2024 restrictions with enhanced geographic support
 const spotify_API_KEY = import.meta.env.VITE_SPOTIFY_API_KEY;
+const spotify_CLIENT_SECRET = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
 
 export class SpotifyAuth {
     constructor() {
         this.clientId = `${spotify_API_KEY}`;
+        this.clientSecret = `${spotify_CLIENT_SECRET}`;
+        // Dynamic redirect URI based on current host
         this.redirectUri = 'https://weatherbeatz.netlify.app/';
         this.scope = 'playlist-modify-public playlist-modify-private user-read-private user-read-email user-library-read user-top-read playlist-read-private user-read-recently-played';
         this.baseUrl = 'https://api.spotify.com/v1';
@@ -31,7 +34,104 @@ export class SpotifyAuth {
             .replace(/=+$/, '');
     }
 
-    // Start the authorization flow
+    // Detect user's likely market/region for better Spotify results
+    detectUserMarket() {
+        try {
+            // Try to detect from browser language/locale
+            const language = navigator.language || navigator.userLanguage || 'en-US';
+            const locale = language.toLowerCase();
+            
+            // Map common locales to Spotify markets
+            const marketMap = {
+                'en-us': 'US', 'en-gb': 'GB', 'en-ca': 'CA', 'en-au': 'AU',
+                'fr-fr': 'FR', 'fr-ca': 'CA', 'de-de': 'DE', 'de-at': 'DE',
+                'es-es': 'ES', 'es-mx': 'MX', 'pt-br': 'BR', 'pt-pt': 'PT',
+                'it-it': 'IT', 'nl-nl': 'NL', 'sv-se': 'SE', 'no-no': 'NO',
+                'da-dk': 'DK', 'fi-fi': 'FI', 'pl-pl': 'PL', 'ru-ru': 'RU',
+                'ja-jp': 'JP', 'ko-kr': 'KR', 'zh-cn': 'CN', 'zh-tw': 'TW'
+            };
+            
+            const detectedMarket = marketMap[locale] || 
+                                 marketMap[locale.split('-')[0]] || 
+                                 'US'; // Default fallback
+            
+            console.log(`🌍 Detected user market: ${detectedMarket} (from locale: ${locale})`);
+            return detectedMarket;
+        } catch (error) {
+            console.warn('Could not detect user market, defaulting to US:', error);
+            return 'US';
+        }
+    }
+
+    // Get comprehensive market list based on user's detected region
+    getMarketStrategy(userMarket = 'US') {
+        // Prioritize user's region, then expand globally
+        const globalMarkets = ['US', 'GB', 'CA', 'AU', 'DE', 'FR', 'ES', 'IT', 'NL', 'SE', 'NO', 'DK', 'FI', 'BR', 'MX', 'JP'];
+        
+        // Put user's market first, then add others
+        const markets = [userMarket];
+        globalMarkets.forEach(market => {
+            if (market !== userMarket && !markets.includes(market)) {
+                markets.push(market);
+            }
+        });
+        
+        return markets;
+    }
+
+    // Client Credentials Flow - Limited to basic search only
+    async getClientCredentialsToken() {
+        console.log('🔑 Getting client credentials token...');
+        
+        if (!this.clientId) {
+            throw new Error('Spotify Client ID not configured');
+        }
+
+        try {
+            const response = await fetch('https://accounts.spotify.com/api/token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Authorization': 'Basic ' + btoa(this.clientId + ':' + (this.clientSecret || ''))
+                },
+                body: new URLSearchParams({
+                    grant_type: 'client_credentials'
+                })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Client credentials failed:', errorText);
+                throw new Error(`Failed to get client credentials token: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            localStorage.setItem('client_access_token', data.access_token);
+            localStorage.setItem('client_token_expires_at', Date.now() + (data.expires_in * 1000));
+            
+            console.log('✅ Client credentials token obtained');
+            return data.access_token;
+            
+        } catch (error) {
+            console.error('Client credentials error:', error);
+            throw error;
+        }
+    }
+
+    // Get valid client credentials token
+    async getValidClientToken() {
+        const accessToken = localStorage.getItem('client_access_token');
+        const expiresAt = localStorage.getItem('client_token_expires_at');
+
+        if (accessToken && expiresAt && Date.now() < parseInt(expiresAt)) {
+            return accessToken;
+        }
+
+        return await this.getClientCredentialsToken();
+    }
+
+    // Start the authorization flow (for user features like playlists)
     async authorize() {
         const codeVerifier = this.generateRandomString(64);
         const hashed = await this.sha256(codeVerifier);
@@ -123,7 +223,7 @@ export class SpotifyAuth {
         return data.access_token;
     }
 
-    // Get current valid access token
+    // Get current valid access token (for user features)
     async getValidAccessToken() {
         const accessToken = localStorage.getItem('access_token');
         const expiresAt = localStorage.getItem('token_expires_at');
@@ -153,328 +253,263 @@ export class SpotifyAuth {
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('token_expires_at');
         localStorage.removeItem('code_verifier');
+        localStorage.removeItem('client_access_token');
+        localStorage.removeItem('client_token_expires_at');
     }
 
-    // Debug auth status
-    async debugAuthStatus() {
-        console.log('=== DEBUGGING SPOTIFY AUTH ===');
-        
-        const accessToken = localStorage.getItem('access_token');
-        const refreshToken = localStorage.getItem('refresh_token');
-        const expiresAt = localStorage.getItem('token_expires_at');
-        
-        console.log('Stored access token exists:', !!accessToken);
-        console.log('Stored refresh token exists:', !!refreshToken);
-        console.log('Token expires at:', expiresAt);
-        console.log('Current time:', Date.now());
-        console.log('Token expired:', expiresAt ? Date.now() > parseInt(expiresAt) : 'No expiry time');
-        
-        if (accessToken) {
-            try {
-                const response = await fetch('https://api.spotify.com/v1/me', {
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                console.log('Token test response status:', response.status);
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('Token is valid! User:', data.display_name || data.id);
-                    console.log('User country:', data.country);
-                } else {
-                    const errorText = await response.text();
-                    console.error('Token test failed:', errorText);
-                }
-            } catch (error) {
-                console.error('Token test error:', error);
-            }
-        }
-        
-        return {
-            hasAccessToken: !!accessToken,
-            hasRefreshToken: !!refreshToken,
-            tokenExpired: expiresAt ? Date.now() > parseInt(expiresAt) : null,
-            isLoggedIn: this.isLoggedIn()
-        };
-    }
+    // ========== ENHANCED GEOGRAPHIC SEARCH ==========
 
-    // ========== ENHANCED GLOBAL SEARCH STRATEGY ==========
-
-    // Get user's market for regional content
-    async getUserMarket() {
+    // Search tracks with geographic awareness
+    async searchTracks(query, limit = 20, market = 'US') {
+        console.log(`🔍 Searching for: "${query}" in market: ${market}`);
+        
         try {
-            const accessToken = await this.getValidAccessToken();
-            const response = await fetch(`${this.baseUrl}/me`, {
+            const accessToken = await this.getValidClientToken();
+            
+            const params = new URLSearchParams({
+                q: query,
+                type: 'track',
+                limit: Math.min(limit, 50),
+                market: market
+            });
+
+            const response = await fetch(`${this.baseUrl}/search?${params}`, {
                 headers: { 'Authorization': `Bearer ${accessToken}` }
             });
-            
-            if (response.ok) {
-                const userData = await response.json();
-                console.log(`🌍 User market detected: ${userData.country}`);
-                return userData.country || 'US';
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`Search failed: ${response.status} - ${errorText}`);
+                
+                // Check for specific geographic errors
+                if (response.status === 400 && errorText.includes('market')) {
+                    console.warn(`Market ${market} not supported for this query`);
+                }
+                
+                return [];
             }
-            return 'US';
+
+            const data = await response.json();
+            const tracks = data.tracks?.items || [];
+            
+            console.log(`📊 Search results: ${tracks.length} tracks in ${market}`);
+            
+            return tracks
+                .filter(track => track && track.id && track.name && track.artists && track.artists.length > 0)
+                .map(track => ({
+                    ...track,
+                    has_preview: !!track.preview_url,
+                    search_market: market,
+                    search_query: query,
+                    available_markets: track.available_markets || []
+                }));
+
         } catch (error) {
-            console.log('Could not get user market, defaulting to US');
-            return 'US';
+            console.error(`Error searching for "${query}" in ${market}:`, error);
+            return [];
         }
     }
 
-    // Global priority markets with largest catalogs
-    getGlobalMarkets(userMarket) {
-        const topMarkets = [
-            userMarket,    // User's country first
-            'US',          // Largest catalog
-            'GB',          // Large English catalog
-            'DE',          // Large European catalog
-            'FR',          // French catalog
-            'CA',          // Canadian catalog
-            'AU',          // Australian catalog
-            'SE',          // Swedish catalog (Spotify's home)
-            'NL',          // Netherlands
-            'ES',          // Spanish catalog
-        ];
-        
-        // Remove duplicates and return top 6
-        return [...new Set(topMarkets)].slice(0, 6);
-    }
-
-    // Ultra-global search terms that work in most markets
-    getUniversalSearchTerms(weatherMain) {
+    // Enhanced weather-based search strategy with MORE variety
+    getWeatherSearchStrategies(weatherMain) {
         const weather = weatherMain.toLowerCase();
         
-        // Use only the most globally available artists and generic terms
-        const searchTerms = {
-            clear: [
-                // Top global superstars (available everywhere)
-                'Taylor Swift', 'Ed Sheeran', 'Billie Eilish', 'Ariana Grande',
-                // Generic terms that work globally
-                'pop music', 'happy music', 'dance music', 'good vibes',
-                'top hits', 'feel good songs', 'upbeat songs', 'positive music'
-            ],
-            sunny: [
-                'Dua Lipa', 'The Weeknd', 'Bruno Mars', 'Post Malone',
-                'summer music', 'party music', 'tropical music', 'beach music',
-                'dance hits', 'reggaeton', 'latin music', 'vacation music'
-            ],
-            rain: [
-                'Adele', 'Sam Smith', 'Lewis Capaldi', 'John Legend',
-                'sad music', 'ballads', 'slow music', 'emotional music',
-                'acoustic music', 'piano music', 'melancholy', 'heartbreak'
-            ],
-            drizzle: [
-                'Lorde', 'Lana Del Rey', 'Phoebe Bridgers', 'Clairo',
-                'indie music', 'chill music', 'mellow music', 'soft music',
-                'alternative music', 'bedroom pop', 'lo-fi', 'dreamy music'
-            ],
-            thunderstorm: [
-                'Imagine Dragons', 'OneRepublic', 'Coldplay', 'Maroon 5',
-                'rock music', 'powerful music', 'energy music', 'anthems',
-                'alternative rock', 'pop rock', 'stadium music', 'epic music'
-            ],
-            snow: [
-                'Bon Iver', 'Iron Wine', 'Fleet Foxes', 'Sufjan Stevens',
-                'winter music', 'acoustic music', 'folk music', 'peaceful music',
-                'quiet music', 'ambient music', 'calm music', 'cozy music'
-            ],
-            clouds: [
-                'Arctic Monkeys', 'The 1975', 'Vampire Weekend', 'Tame Impala',
-                'indie rock', 'alternative music', 'modern rock', 'indie pop',
-                'brit rock', 'garage rock', 'psychedelic', 'experimental'
-            ],
-            mist: [
-                'Radiohead', 'Massive Attack', 'Portishead', 'James Blake',
-                'electronic music', 'ambient music', 'trip hop', 'atmospheric',
-                'experimental music', 'downtempo', 'chillout', 'ethereal'
-            ],
-            fog: [
-                'Bonobo', 'Tycho', 'Four Tet', 'Burial',
-                'ambient electronic', 'instrumental', 'soundscapes', 'meditation',
-                'lounge music', 'minimal music', 'background music', 'study music'
-            ]
+        const strategies = {
+            clear: {
+                // Expanded genres for more variety
+                genres: ['pop', 'dance', 'indie-pop', 'electronic', 'funk', 'disco', 'house', 'tropical-house', 'latin'],
+                moods: ['happy', 'upbeat', 'energetic', 'positive', 'cheerful', 'euphoric', 'joyful'],
+                artists: ['Taylor Swift', 'Dua Lipa', 'Harry Styles', 'Ed Sheeran', 'Ariana Grande', 'Post Malone', 'Olivia Rodrigo', 'The Weeknd'],
+                keywords: ['summer', 'sunshine', 'feel good', 'party', 'dance', 'celebration', 'beach', 'vacation'],
+                years: ['2020-2024', '2021-2024', '2022-2024', '2023-2024']
+            },
+            rain: {
+                genres: ['indie', 'folk', 'acoustic', 'alternative', 'singer-songwriter', 'indie-folk', 'bedroom-pop'],
+                moods: ['melancholy', 'contemplative', 'chill', 'cozy', 'introspective', 'nostalgic', 'dreamy'],
+                artists: ['Bon Iver', 'Phoebe Bridgers', 'The National', 'Adele', 'Lana Del Rey', 'Radiohead', 'Sufjan Stevens', 'Cigarettes After Sex'],
+                keywords: ['rainy day', 'introspective', 'quiet', 'peaceful', 'reflection', 'cozy', 'melancholy'],
+                years: ['2020-2024', '2021-2024', '2022-2024']
+            },
+            drizzle: {
+                genres: ['indie-folk', 'chill', 'ambient', 'soft-rock', 'lo-fi', 'dream-pop', 'chillwave'],
+                moods: ['gentle', 'mellow', 'soothing', 'calm', 'relaxed', 'soft', 'peaceful'],
+                artists: ['Lorde', 'Clairo', 'Rex Orange County', 'boy pablo', 'Mac DeMarco', 'Tame Impala', 'Beach House'],
+                keywords: ['soft', 'gentle', 'dreamy', 'lo-fi', 'chill', 'mellow', 'relaxing'],
+                years: ['2020-2024', '2021-2024', '2022-2024']
+            },
+            thunderstorm: {
+                genres: ['rock', 'metal', 'electronic', 'alternative', 'punk', 'hard-rock', 'dubstep'],
+                moods: ['intense', 'powerful', 'dramatic', 'energetic', 'explosive', 'electric', 'aggressive'],
+                artists: ['Imagine Dragons', 'Twenty One Pilots', 'Linkin Park', 'The Killers', 'Arctic Monkeys', 'Foo Fighters', 'Royal Blood'],
+                keywords: ['powerful', 'intense', 'epic', 'storm', 'electric', 'thunder', 'dramatic'],
+                years: ['2020-2024', '2021-2024', '2022-2024']
+            },
+            snow: {
+                genres: ['folk', 'ambient', 'classical', 'indie', 'acoustic', 'winter', 'neoclassical'],
+                moods: ['peaceful', 'serene', 'contemplative', 'cozy', 'quiet', 'magical', 'calm'],
+                artists: ['Sufjan Stevens', 'Ólafur Arnalds', 'Agnes Obel', 'Bon Iver', 'Iron & Wine', 'Nils Frahm'],
+                keywords: ['winter', 'peaceful', 'quiet', 'serene', 'cozy', 'snow', 'cold'],
+                years: ['2020-2024', '2021-2024', '2022-2024']
+            },
+            clouds: {
+                genres: ['alternative', 'indie-rock', 'dream-pop', 'shoegaze', 'post-rock', 'brit-pop'],
+                moods: ['contemplative', 'atmospheric', 'mellow', 'thoughtful', 'dreamy', 'moody'],
+                artists: ['The 1975', 'Arctic Monkeys', 'Vampire Weekend', 'Tame Impala', 'MGMT', 'Foster the People'],
+                keywords: ['atmospheric', 'dreamy', 'alternative', 'indie', 'cloudy', 'overcast'],
+                years: ['2020-2024', '2021-2024', '2022-2024']
+            },
+            mist: {
+                genres: ['ambient', 'electronic', 'dream-pop', 'shoegaze', 'ethereal', 'chillwave'],
+                moods: ['ethereal', 'dreamy', 'atmospheric', 'mysterious', 'floating', 'surreal'],
+                artists: ['Beach House', 'Slowdive', 'My Bloody Valentine', 'Mazzy Star', 'Cocteau Twins'],
+                keywords: ['ethereal', 'dreamy', 'ambient', 'atmospheric', 'misty', 'floating'],
+                years: ['2020-2024', '2021-2024', '2022-2024']
+            },
+            fog: {
+                genres: ['ambient', 'post-rock', 'electronic', 'experimental', 'minimalist', 'drone'],
+                moods: ['mysterious', 'atmospheric', 'minimalist', 'contemplative', 'obscure', 'enigmatic'],
+                artists: ['Sigur Rós', 'Stars of the Lid', 'Tim Hecker', 'Brian Eno', 'Godspeed You! Black Emperor'],
+                keywords: ['atmospheric', 'ambient', 'mysterious', 'minimalist', 'fog', 'obscured'],
+                years: ['2020-2024', '2021-2024', '2022-2024']
+            }
         };
 
-        return searchTerms[weather] || searchTerms.clear;
+        return strategies[weather] || strategies.clear;
     }
 
-    // Enhanced search with aggressive market and fallback strategies
-    async searchTracksGlobal(accessToken, query, limit = 20, markets = ['US']) {
-        console.log(`🌍 Global search for: "${query}" across markets: ${markets.join(', ')}`);
-        
-        for (const market of markets) {
-            try {
-                const params = new URLSearchParams({
-                    q: query,
-                    type: 'track',
-                    limit: Math.min(limit, 50),
-                    market: market
-                });
-
-                const response = await fetch(`${this.baseUrl}/search?${params}`, {
-                    headers: { 'Authorization': `Bearer ${accessToken}` }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    const tracks = data.tracks?.items || [];
-                    
-                    if (tracks.length > 0) {
-                        console.log(`✅ Found ${tracks.length} tracks in ${market} for "${query}"`);
-                        
-                        return tracks
-                            .filter(track => track && track.id && track.name && track.artists && track.artists.length > 0)
-                            .map(track => ({
-                                ...track,
-                                has_real_preview: !!track.preview_url,
-                                search_market: market,
-                                search_query: query
-                            }));
-                    }
-                } else {
-                    console.log(`❌ Search failed in ${market}: ${response.status}`);
-                }
-            } catch (error) {
-                console.error(`Error searching in market ${market}:`, error);
-            }
-            
-            // Small delay between market attempts
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-        
-        console.log(`❌ No results for "${query}" in any market`);
-        return [];
-    }
-
-    // Ultimate fallback searches guaranteed to work globally
-    async getGlobalFallback(accessToken, markets) {
-        console.log('🚨 Attempting global fallback searches...');
-        
-        const universalFallbacks = [
-            // These should work in virtually any market
-            'music',
-            'songs',
-            'pop',
-            'hits',
-            'popular',
-            'chart',
-            'radio',
-            'playlist'
-        ];
-        
-        for (const fallback of universalFallbacks) {
-            const results = await this.searchTracksGlobal(accessToken, fallback, 30, markets);
-            if (results.length > 0) {
-                console.log(`✅ Global fallback success with "${fallback}": ${results.length} tracks`);
-                return results;
-            }
-            await new Promise(resolve => setTimeout(resolve, 200));
-        }
-        
-        return [];
-    }
-
-    // Main recommendation method - ULTRA GLOBAL COMPATIBLE
+    // AGGRESSIVE recommendation method to ensure full track count
     async getRecommendations(weatherMain, limit = 25) {
-        console.log('=== ULTRA-GLOBAL PLAYLIST GENERATION ===');
-        console.log(`🌍 Weather: ${weatherMain}, Requested: ${limit} tracks`);
+        console.log('=== AGGRESSIVE PLAYLIST GENERATION ===');
+        console.log(`🌍 Weather: ${weatherMain}, Target: ${limit} tracks`);
         
         try {
-            const accessToken = await this.getValidAccessToken();
-            if (!accessToken) {
-                throw new Error('Not authenticated with Spotify');
-            }
-
-            // Get user's market and global market list
-            const userMarket = await this.getUserMarket();
-            const markets = this.getGlobalMarkets(userMarket);
-            console.log(`🌍 Search markets: ${markets.join(', ')}`);
-
             let allTracks = [];
-            const searchTerms = this.getUniversalSearchTerms(weatherMain);
+            const strategy = this.getWeatherSearchStrategies(weatherMain);
             
-            console.log('🎯 Starting global search strategy...');
+            // Detect user's market and build strategy
+            const userMarket = this.detectUserMarket();
+            const marketList = this.getMarketStrategy(userMarket);
             
-            // Phase 1: Weather-specific searches across all markets
-            for (const term of searchTerms.slice(0, 6)) {
-                if (allTracks.length >= limit * 1.5) break;
-                
-                const results = await this.searchTracksGlobal(accessToken, term, 15, markets);
-                if (results.length > 0) {
-                    allTracks.push(...results);
-                    console.log(`✅ Added ${results.length} tracks from "${term}"`);
-                }
-                
-                await new Promise(resolve => setTimeout(resolve, 200));
-            }
+            console.log(`🎯 User market detected: ${userMarket}`);
+            console.log(`🌐 Market search order: ${marketList.slice(0, 4).join(', ')}`);
             
-            console.log(`📊 Phase 1 results: ${allTracks.length} tracks`);
-
-            // Phase 2: If still no results, try basic music terms
-            if (allTracks.length === 0) {
-                console.log('🔄 Phase 2: Basic music search...');
+            // PHASE 1: Main search queries (Get bulk of tracks)
+            const mainQueries = [
+                // High-yield genre searches
+                `genre:${strategy.genres[0]}`,
+                `genre:${strategy.genres[1]}`,
+                strategy.genres[2] || strategy.genres[0], // Direct genre search
                 
-                const basicTerms = ['music', 'songs', 'pop', 'hits'];
-                for (const term of basicTerms) {
-                    const results = await this.searchTracksGlobal(accessToken, term, 20, markets);
+                // Popular artists
+                strategy.artists[0],
+                strategy.artists[1],
+                strategy.artists[2] || strategy.artists[0],
+                
+                // Mood-based searches
+                `${strategy.moods[0]} music`,
+                `${strategy.moods[1]} songs`,
+                
+                // Keyword searches
+                strategy.keywords[0],
+                strategy.keywords[1] || strategy.keywords[0],
+                
+                // Year-based searches for freshness
+                `year:2023-2024`,
+                `year:2022-2024`,
+                
+                // Fallback popular searches
+                'popular music',
+                'top hits',
+                'trending'
+            ];
+            
+            console.log(`🚀 Starting aggressive search with ${mainQueries.length} queries...`);
+            
+            // Execute main searches aggressively
+            for (let i = 0; i < mainQueries.length && allTracks.length < limit * 2; i++) {
+                const query = mainQueries[i];
+                
+                // Try primary market first (more results per call)
+                try {
+                    console.log(`🔍 Main Query ${i+1}/${mainQueries.length}: "${query}" in ${userMarket}`);
+                    const results = await this.searchTracks(query, 30, userMarket); // Get 30 per call
+                    
                     if (results.length > 0) {
                         allTracks.push(...results);
-                        console.log(`✅ Basic search success with "${term}": ${results.length} tracks`);
-                        break;
+                        console.log(`✅ Added ${results.length} tracks from ${userMarket} (Total: ${allTracks.length})`);
+                    } else if (i < 5) { // Try backup market for first 5 queries only
+                        console.log(`🔄 Trying backup market for critical query`);
+                        const backupResults = await this.searchTracks(query, 30, 'US');
+                        if (backupResults.length > 0) {
+                            allTracks.push(...backupResults);
+                            console.log(`✅ Added ${backupResults.length} tracks from US backup`);
+                        }
                     }
-                    await new Promise(resolve => setTimeout(resolve, 300));
-                }
-            }
-
-            // Phase 3: Ultimate fallback - guaranteed to work
-            if (allTracks.length === 0) {
-                console.log('🚨 Phase 3: Ultimate global fallback...');
-                allTracks = await this.getGlobalFallback(accessToken, markets);
-            }
-
-            // Phase 4: Last resort - search without market restriction
-            if (allTracks.length === 0) {
-                console.log('🆘 Phase 4: Last resort - no market restrictions...');
-                try {
-                    const response = await fetch(`${this.baseUrl}/search?q=music&type=track&limit=30`, {
-                        headers: { 'Authorization': `Bearer ${accessToken}` }
-                    });
                     
-                    if (response.ok) {
-                        const data = await response.json();
-                        allTracks = (data.tracks?.items || [])
-                            .filter(track => track && track.id)
-                            .map(track => ({
-                                ...track,
-                                has_real_preview: !!track.preview_url,
-                                search_market: 'global',
-                                search_query: 'music'
-                            }));
-                        console.log(`🆘 Last resort found: ${allTracks.length} tracks`);
-                    }
+                    // Quick delay to avoid overwhelming API
+                    await new Promise(resolve => setTimeout(resolve, 250));
+                    
                 } catch (error) {
-                    console.error('Last resort search failed:', error);
+                    console.error(`Failed main query "${query}":`, error);
+                    continue;
+                }
+                
+                // Early exit if we have enough
+                if (allTracks.length >= limit * 1.5) {
+                    console.log(`🎯 Early exit: Got ${allTracks.length} tracks, more than target`);
+                    break;
+                }
+            }
+            
+            // PHASE 2: Fill-up searches if still short
+            if (allTracks.length < limit) {
+                console.log(`🔄 Phase 2: Need ${limit - allTracks.length} more tracks, running fill-up searches...`);
+                
+                const fillUpQueries = [
+                    'hits 2024',
+                    'popular songs',
+                    'chart music',
+                    'best music',
+                    'new music',
+                    'trending songs'
+                ];
+                
+                for (const query of fillUpQueries) {
+                    if (allTracks.length >= limit * 1.2) break;
+                    
+                    try {
+                        const results = await this.searchTracks(query, 25, userMarket);
+                        if (results.length > 0) {
+                            allTracks.push(...results);
+                            console.log(`✅ Fill-up: Added ${results.length} tracks (Total: ${allTracks.length})`);
+                        }
+                        await new Promise(resolve => setTimeout(resolve, 200));
+                    } catch (error) {
+                        console.error(`Fill-up query failed:`, error);
+                        continue;
+                    }
                 }
             }
 
             if (allTracks.length === 0) {
-                throw new Error(`Unable to find any music in your region. This may be due to strict regional restrictions. Please try using a VPN or contact support.`);
+                throw new Error('Unable to generate playlist. This may be due to Spotify API restrictions in your region. Please try again.');
             }
 
-            // Process and return results
+            // Process and return final tracks
             const uniqueTracks = this.removeDuplicates(allTracks);
+            console.log(`🧹 After deduplication: ${uniqueTracks.length} unique tracks`);
+            
             const shuffledTracks = this.shuffleArray(uniqueTracks);
             const finalTracks = shuffledTracks.slice(0, limit);
 
-            console.log(`🎉 GLOBAL SUCCESS: ${finalTracks.length} tracks`);
+            console.log(`🎉 FINAL SUCCESS: Generated ${finalTracks.length} tracks out of ${limit} requested`);
+            console.log(`📈 Success rate: ${Math.round((finalTracks.length / limit) * 100)}%`);
             console.log(`🌍 Markets used: ${[...new Set(finalTracks.map(t => t.search_market))].join(', ')}`);
-            console.log(`🎵 Preview rate: ${finalTracks.filter(t => t.has_real_preview).length}/${finalTracks.length}`);
-
+            
             return finalTracks;
 
         } catch (error) {
-            console.error('💥 Global playlist generation failed:', error);
+            console.error('💥 Aggressive playlist generation failed:', error);
             throw error;
         }
     }
@@ -487,9 +522,11 @@ export class SpotifyAuth {
         return tracks.filter(track => {
             if (!track || !track.id) return false;
             
+            // Check by Spotify ID
             if (seen.has(track.id)) return false;
             seen.add(track.id);
             
+            // Check by artist + title combination
             const combo = `${track.artists[0]?.name?.toLowerCase()}-${track.name?.toLowerCase()}`;
             if (seenCombos.has(combo)) return false;
             seenCombos.add(combo);
@@ -498,7 +535,7 @@ export class SpotifyAuth {
         });
     }
 
-    // Shuffle array
+    // Shuffle array utility
     shuffleArray(array) {
         const shuffled = [...array];
         for (let i = shuffled.length - 1; i > 0; i--) {
@@ -508,7 +545,7 @@ export class SpotifyAuth {
         return shuffled;
     }
 
-    // Rest of methods (getUserProfile, createPlaylist, etc.) remain the same...
+    // User profile (requires user auth) - UNCHANGED
     async getUserProfile() {
         const accessToken = await this.getValidAccessToken();
         if (!accessToken) {
@@ -534,6 +571,7 @@ export class SpotifyAuth {
         }
     }
 
+    // Create playlist (requires user auth) - UNCHANGED
     async createPlaylist(userId, name, description = '', isPublic = false) {
         const accessToken = await this.getValidAccessToken();
         if (!accessToken) {
@@ -566,6 +604,7 @@ export class SpotifyAuth {
         }
     }
 
+    // Add tracks to playlist (requires user auth) - UNCHANGED
     async addTracksToPlaylist(playlistId, trackUris) {
         const accessToken = await this.getValidAccessToken();
         if (!accessToken) {
@@ -597,19 +636,33 @@ export class SpotifyAuth {
     }
 }
 
-// Weather API (unchanged)
+// Enhanced Weather API with better geographic error handling
 const weather_API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
 
 export const getWeather = async (latitude, longitude) => {
     try {
+        console.log(`🌤️ Fetching weather for coordinates: ${latitude}, ${longitude}`);
+        
         const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${weather_API_KEY}&units=imperial`);
         
         if (!response.ok) {
-            throw new Error(`Weather API error: ${response.status}`);
+            const errorText = await response.text();
+            console.error('Weather API error:', errorText);
+            
+            // Provide more specific error messages for geographic issues
+            if (response.status === 401) {
+                throw new Error('Weather API key invalid - please contact support');
+            } else if (response.status === 404) {
+                throw new Error('Weather data not available for your location');
+            } else if (response.status === 429) {
+                throw new Error('Weather service temporarily unavailable - please try again in a moment');
+            } else {
+                throw new Error(`Weather API error: ${response.status}`);
+            }
         }
         
         const data = await response.json();
-        console.log('Weather API response:', data);
+        console.log('✅ Weather API response received:', data);
         return data;
     } catch (error) {
         console.error('Error fetching weather:', error);

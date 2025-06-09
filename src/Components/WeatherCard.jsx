@@ -128,7 +128,7 @@ function WeatherCard ({ weatherData }){
                 </div>
             </div>
 
-            {/* Music Card Section - Integrated */}
+            {/* Music Card Section*/}
             <div className="music-card-integrated">
                 <Card weatherData={weatherData} />
             </div>

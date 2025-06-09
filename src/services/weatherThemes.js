@@ -202,7 +202,7 @@ export const getWeatherTheme = (weatherMain) => {
     }
   };
 
-  // Determine which theme to use
+
   let themeKey = weatherMain.toLowerCase();
   
   if (themeKey === 'clear') {
@@ -212,7 +212,6 @@ export const getWeatherTheme = (weatherMain) => {
   return themes[themeKey] || themes.clearDay;
 };
 
-// Hook to apply weather theme
 export const useWeatherTheme = (weatherData) => {
   const [currentTheme, setCurrentTheme] = useState(null);
 
@@ -258,7 +257,6 @@ export const useWeatherTheme = (weatherData) => {
   return currentTheme;
 };
 
-// Utility to get theme preview
 export const getThemePreview = (weatherType) => {
   const theme = getWeatherTheme(weatherType);
   return {
@@ -273,7 +271,7 @@ export const getThemePreview = (weatherType) => {
   };
 };
 
-// Export individual themes for testing/preview
+
 export const weatherThemes = {
   rain: () => getWeatherTheme('rain'),
   snow: () => getWeatherTheme('snow'),
