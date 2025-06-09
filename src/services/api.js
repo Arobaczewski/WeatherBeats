@@ -5,7 +5,7 @@ const spotify_API_KEY = import.meta.env.VITE_SPOTIFY_API_KEY;
 export class SpotifyAuth {
     constructor() {
         this.clientId = `${spotify_API_KEY}`;
-        this.redirectUri = 'http://127.0.0.1:5173';
+        this.redirectUri = 'https://weatherbeatz.netlify.app/';
         this.scope = 'playlist-modify-public playlist-modify-private user-read-private user-read-email user-library-read user-top-read playlist-read-private user-read-recently-played';
         this.baseUrl = 'https://api.spotify.com/v1';
     }
