@@ -6,7 +6,7 @@ export class SpotifyAuth {
     constructor() {
         this.clientId = import.meta.env.VITE_SPOTIFY_API_KEY;
         this.clientSecret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
-        this.redirectUri = `https://weatherbeatz.netlify.app/`;
+        this.redirectUri = `http://127.0.0.1:5173`;
         this.scope = 'playlist-modify-public playlist-modify-private user-read-private user-read-email user-library-read user-top-read playlist-read-private user-read-recently-played';
         this.baseUrl = 'https://api.spotify.com/v1';
     }
@@ -102,7 +102,10 @@ export class SpotifyAuth {
 
             const data = await response.json();
             
-            // Don't use localStorage in artifacts - use in-memory storage
+            // Store in sessionStorage and memory
+            sessionStorage.setItem('spotify_client_access_token', data.access_token);
+            sessionStorage.setItem('spotify_client_token_expiry', (Date.now() + (data.expires_in * 1000)).toString());
+            
             this.clientAccessToken = data.access_token;
             this.clientTokenExpiry = Date.now() + (data.expires_in * 1000);
             
@@ -117,8 +120,17 @@ export class SpotifyAuth {
 
     // Get valid client credentials token
     async getValidClientToken() {
-        if (this.clientAccessToken && this.clientTokenExpiry && Date.now() < this.clientTokenExpiry) {
-            return this.clientAccessToken;
+        // Check memory first, then sessionStorage
+        let accessToken = this.clientAccessToken || sessionStorage.getItem('spotify_client_access_token');
+        let tokenExpiry = this.clientTokenExpiry || parseInt(sessionStorage.getItem('spotify_client_token_expiry') || '0');
+
+        if (accessToken && tokenExpiry && Date.now() < tokenExpiry) {
+            // Update memory cache if loaded from sessionStorage
+            if (!this.clientAccessToken) {
+                this.clientAccessToken = accessToken;
+                this.clientTokenExpiry = tokenExpiry;
+            }
+            return accessToken;
         }
 
         return await this.getClientCredentialsToken();
@@ -130,8 +142,8 @@ export class SpotifyAuth {
         const hashed = await this.sha256(codeVerifier);
         const codeChallenge = this.base64urlencode(hashed);
 
-        // Store in memory instead of localStorage
-        this.codeVerifier = codeVerifier;
+        // Store code verifier in sessionStorage (survives page redirect)
+        sessionStorage.setItem('spotify_code_verifier', codeVerifier);
 
         const authUrl = new URL("https://accounts.spotify.com/authorize");
         const params = {
@@ -149,6 +161,12 @@ export class SpotifyAuth {
 
     // Exchange authorization code for access token
     async getAccessToken(code) {
+        const codeVerifier = sessionStorage.getItem('spotify_code_verifier');
+        
+        if (!codeVerifier) {
+            throw new Error('No code verifier found. Please restart the authentication process.');
+        }
+
         const response = await fetch('https://accounts.spotify.com/api/token', {
             method: 'POST',
             headers: {
@@ -159,29 +177,40 @@ export class SpotifyAuth {
                 grant_type: 'authorization_code',
                 code: code,
                 redirect_uri: this.redirectUri,
-                code_verifier: this.codeVerifier,
+                code_verifier: codeVerifier,
             }),
         });
 
         if (!response.ok) {
             const errorText = await response.text();
+            // Clear the invalid code verifier
+            sessionStorage.removeItem('spotify_code_verifier');
             throw new Error(`Failed to get access token: ${response.status} - ${errorText}`);
         }
 
         const data = await response.json();
         
-        // Store in memory instead of localStorage
+        // Store tokens in sessionStorage for persistence across page reloads
+        sessionStorage.setItem('spotify_access_token', data.access_token);
+        sessionStorage.setItem('spotify_refresh_token', data.refresh_token);
+        sessionStorage.setItem('spotify_token_expiry', (Date.now() + (data.expires_in * 1000)).toString());
+        
+        // Also store in memory for current session
         this.accessToken = data.access_token;
         this.refreshToken = data.refresh_token;
         this.tokenExpiry = Date.now() + (data.expires_in * 1000);
-        this.codeVerifier = null;
+        
+        // Clean up code verifier
+        sessionStorage.removeItem('spotify_code_verifier');
 
         return data.access_token;
     }
 
     // Refresh access token
     async refreshAccessToken() {
-        if (!this.refreshToken) {
+        let refreshToken = this.refreshToken || sessionStorage.getItem('spotify_refresh_token');
+        
+        if (!refreshToken) {
             throw new Error('No refresh token available');
         }
 
@@ -193,21 +222,28 @@ export class SpotifyAuth {
             body: new URLSearchParams({
                 client_id: this.clientId,
                 grant_type: 'refresh_token',
-                refresh_token: this.refreshToken,
+                refresh_token: refreshToken,
             }),
         });
 
         if (!response.ok) {
             const errorText = await response.text();
+            // Clear invalid tokens
+            this.logout();
             throw new Error(`Failed to refresh token: ${response.status} - ${errorText}`);
         }
 
         const data = await response.json();
         
+        // Store new tokens
+        sessionStorage.setItem('spotify_access_token', data.access_token);
+        sessionStorage.setItem('spotify_token_expiry', (Date.now() + (data.expires_in * 1000)).toString());
+        
         this.accessToken = data.access_token;
         this.tokenExpiry = Date.now() + (data.expires_in * 1000);
         
         if (data.refresh_token) {
+            sessionStorage.setItem('spotify_refresh_token', data.refresh_token);
             this.refreshToken = data.refresh_token;
         }
 
@@ -216,8 +252,18 @@ export class SpotifyAuth {
 
     // Get current valid access token
     async getValidAccessToken() {
-        if (this.accessToken && this.tokenExpiry && Date.now() < this.tokenExpiry) {
-            return this.accessToken;
+        // Check memory first, then sessionStorage
+        let accessToken = this.accessToken || sessionStorage.getItem('spotify_access_token');
+        let tokenExpiry = this.tokenExpiry || parseInt(sessionStorage.getItem('spotify_token_expiry') || '0');
+
+        if (accessToken && tokenExpiry && Date.now() < tokenExpiry) {
+            // Update memory cache if it was loaded from sessionStorage
+            if (!this.accessToken) {
+                this.accessToken = accessToken;
+                this.tokenExpiry = tokenExpiry;
+                this.refreshToken = sessionStorage.getItem('spotify_refresh_token');
+            }
+            return accessToken;
         }
 
         try {
@@ -229,17 +275,28 @@ export class SpotifyAuth {
 
     // Check if user is logged in
     isLoggedIn() {
-        return this.accessToken && this.tokenExpiry && Date.now() < this.tokenExpiry;
+        const accessToken = this.accessToken || sessionStorage.getItem('spotify_access_token');
+        const tokenExpiry = this.tokenExpiry || parseInt(sessionStorage.getItem('spotify_token_expiry') || '0');
+        
+        return accessToken && tokenExpiry && Date.now() < tokenExpiry;
     }
 
     // Logout
     logout() {
+        // Clear memory
         this.accessToken = null;
         this.refreshToken = null;
         this.tokenExpiry = null;
-        this.codeVerifier = null;
         this.clientAccessToken = null;
         this.clientTokenExpiry = null;
+        
+        // Clear sessionStorage
+        sessionStorage.removeItem('spotify_access_token');
+        sessionStorage.removeItem('spotify_refresh_token');
+        sessionStorage.removeItem('spotify_token_expiry');
+        sessionStorage.removeItem('spotify_code_verifier');
+        sessionStorage.removeItem('spotify_client_access_token');
+        sessionStorage.removeItem('spotify_client_token_expiry');
     }
 
     // Enhanced search with better error handling
