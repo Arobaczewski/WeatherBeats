@@ -6,7 +6,7 @@ export class SpotifyAuth {
     constructor() {
         this.clientId = import.meta.env.VITE_SPOTIFY_API_KEY;
         this.clientSecret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
-        this.redirectUri = `http://127.0.0.1:5173`;
+        this.redirectUri = 'https://weatherbeatz.netlify.app/';
         this.scope = 'playlist-modify-public playlist-modify-private user-read-private user-read-email user-library-read user-top-read playlist-read-private user-read-recently-played';
         this.baseUrl = 'https://api.spotify.com/v1';
     }
