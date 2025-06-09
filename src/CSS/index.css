@@ -1,0 +1,344 @@
+/* CSS Custom Properties for Dynamic Theming */
+:root {
+  --theme-background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --theme-accent: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  --theme-card-bg: rgba(255, 255, 255, 0.15);
+  --theme-text-primary: white;
+  --theme-text-secondary: rgba(255, 255, 255, 0.8);
+  --theme-particle-color: rgba(255, 255, 255, 0.1);
+  --theme-shadows: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --animation-speed: 1s;
+}
+
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--theme-background) !important;
+  min-height: 100vh;
+  color: #333;
+  line-height: 1.6;
+  transition: all 1.5s ease-in-out;
+  position: relative;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Dynamic particle system based on weather */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.6;
+  transition: all 1s ease-in-out;
+}
+
+/* ============ WEATHER PARTICLE ANIMATIONS ============ */
+
+/* Rain Animation */
+.theme-rainy::before {
+  background: 
+    linear-gradient(transparent 50%, var(--theme-particle-color) 50%, var(--theme-particle-color) 52%, transparent 52%),
+    linear-gradient(90deg, transparent 20%, var(--theme-particle-color) 20%, var(--theme-particle-color) 22%, transparent 22%);
+  background-size: 3px 50px, 50px 3px;
+  animation: rain-drops 0.8s linear infinite;
+}
+
+@keyframes rain-drops {
+  0% { transform: translateY(-100vh) translateX(0); }
+  100% { transform: translateY(100vh) translateX(-20px); }
+}
+
+/* Light Drizzle */
+.theme-drizzle::before {
+  background: 
+    radial-gradient(circle, var(--theme-particle-color) 1px, transparent 1px);
+  background-size: 20px 20px;
+  animation: light-rain 2s linear infinite;
+}
+
+@keyframes light-rain {
+  0% { transform: translateY(-50px); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateY(50px); opacity: 0; }
+}
+
+/* Thunderstorm Lightning */
+.theme-storm::before {
+  background: linear-gradient(45deg, transparent 40%, var(--theme-particle-color) 41%, var(--theme-particle-color) 43%, transparent 44%);
+  background-size: 100px 100px;
+  animation: lightning-flash 3s infinite;
+}
+
+@keyframes lightning-flash {
+  0%, 90%, 100% { opacity: 0; }
+  1%, 3%, 5% { opacity: 1; background-color: rgba(255, 255, 255, 0.1); }
+  2%, 4% { opacity: 0.8; }
+}
+
+/* Snow Fall */
+.theme-winter::before {
+  background: 
+    radial-gradient(circle, var(--theme-particle-color) 2px, transparent 2px),
+    radial-gradient(circle, var(--theme-particle-color) 1px, transparent 1px);
+  background-size: 50px 50px, 100px 100px;
+  animation: snow-fall 10s linear infinite;
+}
+
+@keyframes snow-fall {
+  0% { transform: translateY(-100vh) rotate(0deg); }
+  100% { transform: translateY(100vh) rotate(360deg); }
+}
+
+/* Cloudy Drift */
+.theme-cloudy::before {
+  background: 
+    radial-gradient(ellipse 200px 50px, var(--theme-particle-color) 40%, transparent 50%);
+  background-size: 400px 200px;
+  animation: slow-drift 20s ease-in-out infinite;
+}
+
+@keyframes slow-drift {
+  0%, 100% { transform: translateX(-50px); }
+  50% { transform: translateX(50px); }
+}
+
+/* Mist Float */
+.theme-misty::before {
+  background: 
+    radial-gradient(ellipse 300px 100px, var(--theme-particle-color) 20%, transparent 70%);
+  background-size: 600px 300px;
+  animation: mist-float 15s ease-in-out infinite;
+}
+
+@keyframes mist-float {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.3; }
+  50% { transform: translateY(-30px) scale(1.1); opacity: 0.6; }
+}
+
+/* Smoke Drift */
+.theme-smoky::before {
+  background: 
+    radial-gradient(ellipse 100px 200px, var(--theme-particle-color) 30%, transparent 70%);
+  background-size: 200px 400px;
+  animation: smoke-drift 8s ease-in-out infinite;
+}
+
+@keyframes smoke-drift {
+  0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+  20% { opacity: 0.6; }
+  80% { opacity: 0.6; }
+  100% { transform: translateY(-100px) rotate(10deg); opacity: 0; }
+}
+
+/* Psychedelic Haze */
+.theme-hazy::before {
+  background: 
+    radial-gradient(circle, var(--theme-particle-color) 20%, transparent 50%),
+    linear-gradient(45deg, transparent 30%, var(--theme-particle-color) 50%, transparent 70%);
+  background-size: 100px 100px, 200px 200px;
+  animation: psychedelic-wave 6s ease-in-out infinite;
+}
+
+@keyframes psychedelic-wave {
+  0%, 100% { transform: scale(1) rotate(0deg); filter: hue-rotate(0deg); }
+  33% { transform: scale(1.1) rotate(120deg); filter: hue-rotate(60deg); }
+  66% { transform: scale(0.9) rotate(240deg); filter: hue-rotate(120deg); }
+}
+
+/* Dust Swirl */
+.theme-dusty::before {
+  background: 
+    radial-gradient(circle, var(--theme-particle-color) 1px, transparent 1px);
+  background-size: 30px 30px;
+  animation: dust-swirl 12s linear infinite;
+}
+
+@keyframes dust-swirl {
+  0% { transform: rotate(0deg) translateY(0); }
+  100% { transform: rotate(360deg) translateY(-20px); }
+}
+
+/* Fog Roll */
+.theme-foggy::before {
+  background: 
+    radial-gradient(ellipse 400px 100px, var(--theme-particle-color) 40%, transparent 70%);
+  background-size: 800px 200px;
+  animation: fog-roll 25s linear infinite;
+}
+
+@keyframes fog-roll {
+  0% { transform: translateX(-100vw); }
+  100% { transform: translateX(100vw); }
+}
+
+/* Ash Fall */
+.theme-apocalyptic::before {
+  background: 
+    radial-gradient(circle, var(--theme-particle-color) 1px, transparent 1px),
+    linear-gradient(transparent 80%, var(--theme-particle-color) 80%);
+  background-size: 40px 40px, 20px 20px;
+  animation: ash-fall 8s linear infinite;
+}
+
+@keyframes ash-fall {
+  0% { transform: translateY(-100vh) scale(1); }
+  100% { transform: translateY(100vh) scale(0.8); }
+}
+
+/* Tornado Spin */
+.theme-chaotic::before {
+  background: 
+    conic-gradient(from 0deg, transparent 70%, var(--theme-particle-color) 80%, transparent 90%);
+  background-size: 200px 200px;
+  animation: tornado-spin 2s linear infinite;
+}
+
+@keyframes tornado-spin {
+  0% { transform: rotate(0deg) scale(1); }
+  100% { transform: rotate(360deg) scale(1.2); }
+}
+
+/* Sun Rays */
+.theme-sunny::before {
+  background: 
+    conic-gradient(from 0deg, transparent 85%, var(--theme-particle-color) 90%, transparent 95%);
+  background-size: 400px 400px;
+  animation: sun-rays 20s linear infinite;
+}
+
+@keyframes sun-rays {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Twinkling Stars */
+.theme-starry::before {
+  background: 
+    radial-gradient(circle, var(--theme-particle-color) 1px, transparent 1px),
+    radial-gradient(circle, var(--theme-particle-color) 0.5px, transparent 0.5px);
+  background-size: 100px 100px, 50px 50px;
+  animation: twinkling-stars 4s ease-in-out infinite;
+}
+
+@keyframes twinkling-stars {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* ============ GLOBAL UTILITIES ============ */
+
+/* Animation utilities */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Theme indicator */
+.theme-indicator {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.theme-indicator:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: scale(1.05);
+}
+
+/* ============ ACCESSIBILITY & RESPONSIVE ============ */
+
+@media (max-width: 768px) {
+  .theme-indicator {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin: 0 auto 1rem;
+    display: block;
+    width: fit-content;
+  }
+  
+  /* Reduce animation intensity on mobile */
+  body::before {
+    opacity: 0.3 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  body::before {
+    display: none !important;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .weather-container,
+  .card-container,
+  .playlists-container,
+  .settings-container,
+  .header-container {
+    border: 2px solid var(--theme-text-primary) !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+  }
+}
+
+@media print {
+  body::before,
+  .theme-indicator {
+    display: none !important;
+  }
+  
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}

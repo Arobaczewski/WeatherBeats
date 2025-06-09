@@ -1,0 +1,318 @@
+/* ============ WEATHER.CSS - Combined Weather and Music Card ============ */
+
+.weather-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  transition: all 1s ease-in-out;
+}
+
+/* Weather Info Section */
+.weather-info-section {
+  background: var(--theme-card-bg, rgba(255, 255, 255, 0.15));
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: var(--theme-shadows, 0 8px 32px rgba(0, 0, 0, 0.1));
+  transition: all 1s ease-in-out;
+}
+
+.weather-info-section:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Music Card Integration */
+.music-card-integrated {
+  width: 100%;
+}
+
+/* Override the Card component's container styling when integrated */
+.music-card-integrated .card-container {
+  margin: 0;
+  grid-area: unset;
+}
+
+/* City Display */
+.city-container {
+  margin-bottom: 1.5rem;
+}
+
+.city {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--theme-text-primary, white);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  transition: color 1s ease-in-out;
+}
+
+/* Weather Information */
+.weather {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.temp,
+.feels-like {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--theme-text-primary, white);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px 16px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 1s ease-in-out;
+}
+
+.temp:hover,
+.feels-like:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(4px);
+}
+
+.weather-description {
+  font-size: 1rem;
+  color: var(--theme-text-secondary, rgba(255, 255, 255, 0.9));
+  text-transform: capitalize;
+  font-style: italic;
+  margin-top: 0.5rem;
+  transition: color 1s ease-in-out;
+}
+
+/* Time and Icon Section */
+.weather-time-icon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.current-time {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--theme-text-primary, white);
+  transition: color 1s ease-in-out;
+}
+
+.weather-icon {
+  color: #fbbf24;
+  display: inline-block;
+  animation: float 3s ease-in-out infinite;
+  font-size: 1.5rem;
+  transition: color 0.3s ease;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+/* Weather Icon Color Changes Based on Condition */
+.weather-icon:has(+ .weather-description:contains("rain")),
+.weather-icon:has(+ .weather-description:contains("drizzle")) {
+  color: #60a5fa;
+}
+
+.weather-icon:has(+ .weather-description:contains("snow")) {
+  color: #e0e7ff;
+}
+
+.weather-icon:has(+ .weather-description:contains("cloud")) {
+  color: #9ca3af;
+}
+
+.weather-icon:has(+ .weather-description:contains("storm")) {
+  color: #fbbf24;
+  animation: lightning-pulse 2s ease-in-out infinite;
+}
+
+@keyframes lightning-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; filter: brightness(1.5); }
+}
+
+/* ============ RESPONSIVE WEATHER CARD ============ */
+
+@media (max-width: 768px) {
+  .weather-info-section {
+    padding: 1.5rem;
+  }
+  
+  .city {
+    font-size: 1.5rem;
+  }
+  
+  .temp,
+  .feels-like {
+    font-size: 1rem;
+    padding: 6px 12px;
+  }
+  
+  .current-time {
+    font-size: 1rem;
+  }
+  
+  .weather-container {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .weather-info-section {
+    padding: 1rem;
+  }
+  
+  .city {
+    font-size: 1.3rem;
+  }
+  
+  .weather {
+    gap: 0.5rem;
+  }
+  
+  .weather-container {
+    gap: 15px;
+  }
+}
+
+/* ============ THEME-SPECIFIC WEATHER EFFECTS ============ */
+
+/* Rainy weather - subtle water droplet effect */
+[data-mood="contemplative"] .weather-info-section {
+  animation: rain-ripple 4s ease-in-out infinite;
+}
+
+@keyframes rain-ripple {
+  0%, 100% { box-shadow: var(--theme-shadows); }
+  50% { box-shadow: var(--theme-shadows), inset 0 0 20px rgba(66, 153, 225, 0.1); }
+}
+
+/* Sunny weather - warm glow */
+[data-mood="energetic"] .weather-info-section {
+  animation: sunny-glow 5s ease-in-out infinite;
+}
+
+@keyframes sunny-glow {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.05); }
+}
+
+/* Stormy weather - dramatic shake */
+[data-mood="intense"] .weather-icon {
+  animation: storm-shake 1s ease-in-out infinite;
+}
+
+@keyframes storm-shake {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-2px) rotate(1deg); }
+  75% { transform: translateY(-4px) rotate(-1deg); }
+}
+
+/* Snow weather - gentle drift */
+[data-mood="peaceful"] .weather-icon {
+  animation: snow-drift 6s ease-in-out infinite;
+}
+
+@keyframes snow-drift {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  33% { transform: translateY(-3px) translateX(2px); }
+  66% { transform: translateY(-6px) translateX(-2px); }
+}
+
+/* Misty weather - soft blur effect */
+[data-mood="ethereal"] .weather-info-section {
+  animation: mist-blur 8s ease-in-out infinite;
+}
+
+@keyframes mist-blur {
+  0%, 100% { filter: blur(0px); }
+  50% { filter: blur(0.5px); }
+}
+
+/* Foggy weather - opacity pulse */
+[data-mood="mysterious"] .weather-description {
+  animation: fog-fade 5s ease-in-out infinite;
+}
+
+@keyframes fog-fade {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0.6; }
+}
+
+/* Windy/Dusty weather - sway effect */
+[data-mood="rugged"] .weather-info-section {
+  animation: wind-sway 4s ease-in-out infinite;
+}
+
+@keyframes wind-sway {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(0.5deg); }
+  75% { transform: rotate(-0.5deg); }
+}
+
+/* Night weather - soft moonlight glow */
+[data-mood="romantic"] .weather-info-section {
+  animation: moonlight-glow 6s ease-in-out infinite;
+}
+
+@keyframes moonlight-glow {
+  0%, 100% { box-shadow: var(--theme-shadows); }
+  50% { box-shadow: var(--theme-shadows), 0 0 30px rgba(167, 139, 250, 0.2); }
+}
+
+/* Gritty mood - subtle shake */
+[data-mood="gritty"] .weather-info-section {
+  animation: gritty-shake 3s ease-in-out infinite;
+}
+
+@keyframes gritty-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(0.5px); }
+  75% { transform: translateX(-0.5px); }
+}
+
+/* Dreamy mood - floating effect */
+[data-mood="dreamy"] .weather-info-section {
+  animation: dreamy-float 8s ease-in-out infinite;
+}
+
+@keyframes dreamy-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+/* Chaotic mood - random movements */
+[data-mood="chaotic"] .weather-icon {
+  animation: chaotic-wiggle 2s ease-in-out infinite;
+}
+
+@keyframes chaotic-wiggle {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-2px) rotate(1deg); }
+  50% { transform: translateY(-1px) rotate(-1deg); }
+  75% { transform: translateY(-3px) rotate(0.5deg); }
+}
+
+/* Ominous mood - dark pulsing */
+[data-mood="ominous"] .weather-info-section {
+  animation: ominous-pulse 3s ease-in-out infinite;
+}
+
+@keyframes ominous-pulse {
+  0%, 100% { border-color: rgba(255, 255, 255, 0.2); }
+  50% { border-color: rgba(245, 101, 101, 0.4); }
+}
+
+/* Gentle mood - soft breathing */
+[data-mood="gentle"] .weather-info-section {
+  animation: gentle-breath 6s ease-in-out infinite;
+}
+
+@keyframes gentle-breath {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.01); }
+}
