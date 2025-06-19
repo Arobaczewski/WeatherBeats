@@ -1,20 +1,79 @@
+/**
+ * Card.css - Music Recommendation Display Component
+ * 
+ * This stylesheet defines the sophisticated music recommendation card that
+ * displays curated music suggestions based on current weather conditions.
+ * 
+ * Key Features:
+ * - Dynamic music style tag system with interactive animations
+ * - Weather-responsive mood animations that match recommended music
+ * - Glassmorphism design with backdrop blur effects
+ * - Responsive typography and layout adaptation
+ * - Accessibility-focused interaction design
+ * 
+ * Design Philosophy:
+ * The card serves as a bridge between weather conditions and music discovery,
+ * using visual cues and animations to reinforce the connection between
+ * environmental conditions and musical mood.
+ * 
+ */
+
+/* ============================================================================ */
+/* MAIN CARD CONTAINER - GLASSMORPHISM FOUNDATION */
+/* ============================================================================ */
+
+/**
+ * Main card container with glassmorphism design
+ * 
+ * Implements modern glass effect with backdrop blur and dynamic theming.
+ * Positioned within CSS Grid layout with hover interactions for engagement.
+ * 
+ * Technical Features:
+ * - CSS Grid area positioning for layout integration
+ * - Backdrop blur for glassmorphism effect
+ * - Dynamic theming via CSS custom properties
+ * - Hardware-accelerated hover animations
+ * - Responsive height adaptation
+ */
 .card-container {
-  grid-area: card;
+  grid-area: card;                         /* CSS Grid positioning */
   background: var(--theme-card-bg, rgba(255, 255, 255, 0.15));
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);             /* Glassmorphism effect */
   border-radius: 24px;
   padding: 2rem;
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: var(--theme-shadows, 0 8px 32px rgba(0, 0, 0, 0.1));
-  height: fit-content;
-  transition: all 1s ease-in-out;
+  height: fit-content;                     /* Adapt to content height */
+  transition: all 1s ease-in-out;         /* Smooth theme transitions */
 }
 
+/**
+ * Card hover effects for enhanced interactivity
+ * 
+ * Subtle lift animation provides immediate visual feedback and creates
+ * sense of depth and responsiveness. Uses transform for hardware acceleration.
+ */
 .card-container:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
+/* ============================================================================ */
+/* TYPOGRAPHY HIERARCHY - SEMANTIC HEADING SYSTEM */
+/* ============================================================================ */
+
+/**
+ * Card header typography with dynamic theming
+ * 
+ * Primary heading that introduces the music recommendation context
+ * with weather-responsive styling and text shadow for depth.
+ * 
+ * Design Features:
+ * - Large, bold typography for clear hierarchy
+ * - Dynamic color theming for weather responsiveness
+ * - Text shadow for improved readability over complex backgrounds
+ * - Smooth color transitions for theme changes
+ */
 .card-header {
   font-size: 1.8rem;
   font-weight: 700;
@@ -24,6 +83,18 @@
   transition: color 1s ease-in-out;
 }
 
+/**
+ * Card content typography
+ * 
+ * Body text with optimized readability and dynamic color theming
+ * that adapts to weather-based visual moods.
+ * 
+ * Features:
+ * - Optimal line height for readability (1.6)
+ * - Secondary color hierarchy for content distinction
+ * - Smooth color transitions for theme changes
+ * - Consistent spacing for visual rhythm
+ */
 .card-container p {
   color: var(--theme-text-secondary, rgba(255, 255, 255, 0.9));
   font-size: 1rem;
@@ -32,69 +103,132 @@
   transition: color 1s ease-in-out;
 }
 
+/* ============================================================================ */
+/* INTERACTIVE MUSIC STYLE TAGS - DYNAMIC RECOMMENDATION SYSTEM */
+/* ============================================================================ */
+
+/**
+ * Interactive music style tags with glassmorphism design
+ * 
+ * Each tag represents a music genre or style recommendation based on
+ * current weather conditions. Features sophisticated micro-animations
+ * and interactive feedback to enhance user engagement with music discovery.
+ * 
+ * Technical Implementation:
+ * - Inline-block display for flexible wrapping
+ * - Gradient backgrounds for visual appeal
+ * - Backdrop blur for glassmorphism integration
+ * - Pill-shaped design with rounded corners
+ * - Smooth transitions for all interactive states
+ * - User-select disabled to prevent text selection
+ */
 .music-style-tag {
   display: inline-block;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
   color: var(--theme-text-primary, white);
   padding: 6px 14px;
   margin: 4px 6px 4px 0;
-  border-radius: 20px;
+  border-radius: 20px;                     /* Pill-shaped tags */
   font-size: 0.85rem;
   font-weight: 500;
   border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
-  cursor: default;
-  user-select: none;
+  cursor: default;                         /* Not clickable, just informative */
+  user-select: none;                       /* Prevent text selection */
 }
 
+/**
+ * Music style tag hover effects
+ * 
+ * Enhanced interactivity with background changes and lift effects
+ * that encourage exploration of different music styles.
+ * 
+ * Animation Features:
+ * - Gradient background intensification
+ * - Subtle upward movement (translateY)
+ * - Enhanced shadow for depth perception
+ * - Smooth transitions for polished feel
+ */
 .music-style-tag:hover {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+/**
+ * Music style tag active state
+ * 
+ * Provides tactile feedback when tags are clicked or touched.
+ * Returns to base position to indicate interaction completion.
+ */
 .music-style-tag:active {
-  transform: translateY(0);
+  transform: translateY(0);                /* Return to base position on click */
 }
 
+/* ============================================================================ */
+/* RESPONSIVE DESIGN - MOBILE OPTIMIZATION */
+/* ============================================================================ */
+
+/**
+ * Tablet and mobile layout adjustments (768px and below)
+ * 
+ * Optimizes card layout and typography for smaller screens while
+ * maintaining visual hierarchy and functionality.
+ */
 @media (max-width: 768px) {
   .card-container {
-    padding: 1.5rem;
+    padding: 1.5rem;                       /* Reduced padding for mobile */
   }
   
   .card-header {
-    font-size: 1.5rem;
+    font-size: 1.5rem;                     /* Smaller header for mobile */
   }
   
   .card-container p {
-    font-size: 0.95rem;
-    margin-bottom: 1rem;
+    font-size: 0.95rem;                    /* Slightly smaller body text */
+    margin-bottom: 1rem;                   /* Tighter spacing */
   }
   
   .music-style-tag {
-    font-size: 0.8rem;
+    font-size: 0.8rem;                     /* Smaller tags for mobile */
     padding: 5px 12px;
-    margin: 3px 4px 3px 0;
+    margin: 3px 4px 3px 0;                 /* Tighter tag spacing */
   }
 }
 
+/**
+ * Small mobile layout adjustments (480px and below)
+ * 
+ * Further optimizations for very small screens and older devices.
+ */
 @media (max-width: 480px) {
   .card-container {
-    padding: 1rem;
+    padding: 1rem;                         /* Minimal padding for small screens */
   }
   
   .card-header {
-    font-size: 1.3rem;
-    margin-bottom: 0.8rem;
+    font-size: 1.3rem;                     /* Compact header size */
+    margin-bottom: 0.8rem;                 /* Tighter header spacing */
   }
   
   .music-style-tag {
-    font-size: 0.75rem;
+    font-size: 0.75rem;                    /* Compact tag size */
     padding: 4px 10px;
   }
 }
 
+/* ============================================================================ */
+/* WEATHER-RESPONSIVE MOOD ANIMATIONS */
+/* ============================================================================ */
+
+/**
+ * Energetic mood animations for sunny/clear weather
+ * 
+ * Bouncing animation reflects the upbeat, energetic nature of
+ * music recommended for bright, energetic weather conditions.
+ * Staggered timing creates wave-like effects across tags.
+ */
 [data-mood="energetic"] .music-style-tag {
   animation: tag-bounce 2s ease-in-out infinite;
 }
@@ -104,6 +238,12 @@
   50% { transform: scale(1.05); }
 }
 
+/**
+ * Contemplative mood animations for rainy weather
+ * 
+ * Gentle breathing animation reflects the introspective quality
+ * of music suited for rainy, reflective weather conditions.
+ */
 [data-mood="contemplative"] .card-container {
   animation: contemplative-breath 6s ease-in-out infinite;
 }
@@ -113,6 +253,12 @@
   50% { transform: scale(1.01); }
 }
 
+/**
+ * Intense mood animations for stormy weather
+ * 
+ * Glowing effect reflects the dramatic, powerful nature of
+ * music recommended for intense weather conditions.
+ */
 [data-mood="intense"] .music-style-tag {
   animation: intense-glow 1.5s ease-in-out infinite;
 }
@@ -122,6 +268,12 @@
   50% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.4); }
 }
 
+/**
+ * Peaceful mood animations for calm weather
+ * 
+ * Floating animation reflects the serene quality of music
+ * recommended for peaceful, tranquil weather conditions.
+ */
 [data-mood="peaceful"] .music-style-tag {
   animation: peaceful-float 4s ease-in-out infinite;
 }
@@ -131,6 +283,12 @@
   50% { transform: translateY(-2px); }
 }
 
+/**
+ * Dreamy mood animations for hazy/misty weather
+ * 
+ * Color-shifting animation creates ethereal, dreamlike effects
+ * that match atmospheric weather conditions.
+ */
 [data-mood="dreamy"] .music-style-tag {
   animation: dreamy-colors 8s ease-in-out infinite;
 }
@@ -141,6 +299,12 @@
   66% { filter: hue-rotate(-10deg); }
 }
 
+/**
+ * Ethereal mood animations for foggy weather
+ * 
+ * Brightness pulsing creates mystical, otherworldly effects
+ * perfect for atmospheric, ambient music recommendations.
+ */
 [data-mood="ethereal"] .card-container {
   animation: ethereal-glow 5s ease-in-out infinite;
 }
@@ -150,6 +314,12 @@
   50% { filter: brightness(1.1); }
 }
 
+/**
+ * Gritty mood animations for dusty/harsh weather
+ * 
+ * Subtle shaking animation reflects the rough, textured quality
+ * of music suited for challenging weather conditions.
+ */
 [data-mood="gritty"] .music-style-tag {
   animation: gritty-shake 3s ease-in-out infinite;
 }
@@ -160,6 +330,12 @@
   75% { transform: rotate(-0.3deg); }
 }
 
+/**
+ * Rugged mood animations for windy weather
+ * 
+ * Text shadow pulsing reflects the bold, powerful nature
+ * of music recommended for dynamic weather conditions.
+ */
 [data-mood="rugged"] .card-header {
   animation: rugged-pulse 3s ease-in-out infinite;
 }
@@ -169,6 +345,12 @@
   50% { text-shadow: 0 2px 15px rgba(0, 0, 0, 0.4); }
 }
 
+/**
+ * Chaotic mood animations for extreme weather
+ * 
+ * Complex multi-property animation reflects the unpredictable
+ * nature of music suited for chaotic weather conditions.
+ */
 [data-mood="chaotic"] .music-style-tag {
   animation: chaotic-dance 2s ease-in-out infinite;
 }
@@ -180,6 +362,12 @@
   75% { transform: rotate(0.5deg) scale(1.01); }
 }
 
+/**
+ * Mysterious mood animations for night/unknown weather
+ * 
+ * Opacity fading creates enigmatic effects that match
+ * the mysterious quality of nighttime music recommendations.
+ */
 [data-mood="mysterious"] .music-style-tag {
   animation: mysterious-fade 4s ease-in-out infinite;
 }
@@ -189,6 +377,12 @@
   50% { opacity: 0.7; }
 }
 
+/**
+ * Ominous mood animations for severe weather warnings
+ * 
+ * Border color pulsing to warning colors reflects the serious
+ * nature of severe weather and corresponding intense music.
+ */
 [data-mood="ominous"] .card-container {
   animation: ominous-pulse 3s ease-in-out infinite;
 }
@@ -198,6 +392,12 @@
   50% { border-color: rgba(245, 101, 101, 0.4); }
 }
 
+/**
+ * Romantic mood animations for pleasant evening weather
+ * 
+ * Gentle swaying motion reflects the soft, romantic quality
+ * of music perfect for beautiful weather conditions.
+ */
 [data-mood="romantic"] .music-style-tag {
   animation: romantic-sway 6s ease-in-out infinite;
 }
@@ -208,6 +408,12 @@
   75% { transform: rotate(-0.5deg); }
 }
 
+/**
+ * Gentle mood animations for mild, pleasant weather
+ * 
+ * Subtle horizontal movement reflects the calm, gentle nature
+ * of music suited for comfortable weather conditions.
+ */
 [data-mood="gentle"] .card-container {
   animation: gentle-motion 7s ease-in-out infinite;
 }
@@ -217,6 +423,18 @@
   50% { transform: translateX(2px); }
 }
 
+/* ============================================================================ */
+/* STAGGERED ANIMATION TIMING - WAVE EFFECTS */
+/* ============================================================================ */
+
+/**
+ * Staggered animation timing for visual interest
+ * 
+ * Creates wave-like animation effects across multiple tags
+ * by staggering the animation start times. This prevents
+ * all tags from animating in unison, creating more dynamic
+ * and visually interesting movement patterns.
+ */
 .music-style-tag:nth-child(1) { animation-delay: 0s; }
 .music-style-tag:nth-child(2) { animation-delay: 0.1s; }
 .music-style-tag:nth-child(3) { animation-delay: 0.2s; }
@@ -224,12 +442,68 @@
 .music-style-tag:nth-child(5) { animation-delay: 0.4s; }
 .music-style-tag:nth-child(6) { animation-delay: 0.5s; }
 
+/* ============================================================================ */
+/* ENHANCED INTERACTION STATES */
+/* ============================================================================ */
+
+/**
+ * Pause animations on hover for better interaction
+ * 
+ * When users hover over tags, animations pause to allow
+ * for easier reading and interaction. The enhanced transform
+ * provides clear feedback that the element is being hovered.
+ */
 .music-style-tag:hover {
   animation-play-state: paused;
   transform: translateY(-3px) scale(1.05);
 }
 
+/**
+ * Focus indicators for accessibility
+ * 
+ * Provides clear visual indicators for keyboard navigation
+ * using the application's accent color for consistency.
+ */
 .music-style-tag:focus {
   outline: 2px solid var(--theme-accent);
   outline-offset: 2px;
+}
+
+/* ============================================================================ */
+/* ACCESSIBILITY AND PERFORMANCE OPTIMIZATIONS */
+/* ============================================================================ */
+
+/**
+ * Reduced motion accessibility support
+ * 
+ * Respects user preferences for reduced motion to accommodate
+ * users with vestibular disorders or motion sensitivity.
+ * All animations are disabled when reduce motion is preferred.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/**
+ * High contrast mode support
+ * 
+ * Improves accessibility for users with visual impairments
+ * by increasing border contrast and background opacity.
+ */
+@media (prefers-contrast: high) {
+  .card-container {
+    border: 2px solid var(--theme-text-primary) !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+  }
+  
+  .music-style-tag {
+    border: 2px solid var(--theme-text-primary) !important;
+    background: rgba(255, 255, 255, 0.3) !important;
+  }
 }

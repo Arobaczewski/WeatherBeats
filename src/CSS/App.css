@@ -1,72 +1,169 @@
+/**
+ * App.css - Main Application Layout and Weather Animation System
+ * 
+ * This stylesheet defines the core layout structure and sophisticated weather-based
+ * animation system for the WeatherBeats application. It implements:
+ * 
+ * - Responsive grid layout with CSS Grid and Flexbox
+ * - Dynamic weather animations that respond to real-time conditions
+ * - Glass morphism design with backdrop filters and transparency
+ * - Smooth transitions and micro-interactions for enhanced UX
+ * - Accessibility considerations with reduced motion support
+ * - Mobile-first responsive design patterns
+ * 
+ * Architecture:
+ * The layout uses CSS Custom Properties (variables) for dynamic theming,
+ * allowing weather conditions to influence colors, shadows, and animations
+ * throughout the application in real-time.
+ * 
+ * Weather Animation System:
+ * Each weather condition has corresponding CSS animations that create
+ * immersive visual experiences matching real-world conditions.
+ * 
+ */
+
+/* ============================================================================ */
+/* MAIN APPLICATION CONTAINER - RESPONSIVE LAYOUT FOUNDATION */
+/* ============================================================================ */
+
+/**
+ * Primary application container with responsive grid layout
+ * 
+ * Uses CSS Grid for main layout structure with flexible sizing.
+ * Implements mobile-first responsive design with automatic content centering.
+ * Maximum width constraint prevents layout from becoming unwieldy on large screens.
+ */
 .app-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+  max-width: 1200px;           /* Optimal reading width for large screens */
+  margin: 0 auto;              /* Center content horizontally */
+  padding: 20px;               /* Consistent spacing on all sides */
   display: flex;
-  flex-direction: column;
-  gap: 24px;
-  min-height: 100vh;
+  flex-direction: column;      /* Stack elements vertically on mobile */
+  gap: 24px;                   /* Consistent spacing between major sections */
+  min-height: 100vh;           /* Ensure full viewport height utilization */
 }
 
+/* ============================================================================ */
+/* HEADER SECTION - GLASSMORPHISM DESIGN WITH DYNAMIC THEMING */
+/* ============================================================================ */
+
+/**
+ * Main header with glassmorphism design and dynamic theming
+ * 
+ * Implements modern glassmorphism design pattern with:
+ * - Semi-transparent backgrounds with backdrop blur
+ * - Dynamic theming through CSS custom properties
+ * - Smooth transitions for weather-based color changes
+ * - Responsive layout that adapts to screen size
+ */
 .header-section {
   display: flex;
   align-items: center;
   justify-content: space-between;
   background: var(--theme-card-bg, rgba(255, 255, 255, 0.1));
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);      /* Creates glass effect */
   border-radius: 20px;
   padding: 1.5rem 2rem;
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: var(--theme-shadows, 0 8px 32px rgba(0, 0, 0, 0.1));
-  transition: all 1s ease-in-out;
+  transition: all 1s ease-in-out;   /* Smooth transitions for theme changes */
 }
 
+/**
+ * Header title with gradient text and responsive typography
+ * 
+ * Creates visually striking title with:
+ * - CSS gradient text effects using background-clip
+ * - Responsive font sizing
+ * - Dynamic color theming
+ * - Text shadow for depth
+ */
 .header-title {
-  flex: 1;
+  flex: 1;                         /* Take available space */
   text-align: center;
 }
 
 .header-title h1 {
   font-size: 3rem;
   font-weight: 800;
+  /* CSS gradient text effect */
   background: linear-gradient(135deg, var(--theme-text-primary, #fff) 0%, rgba(255, 255, 255, 0.8) 100%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   margin: 0;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.02em;         /* Tight letter spacing for modern look */
   transition: all 1s ease-in-out;
 }
 
+/**
+ * Header actions container for user controls
+ * 
+ * Contains authentication buttons and user controls.
+ * Uses minimum width to prevent layout shifts during state changes.
+ */
 .header-actions {
   min-width: 200px;
   display: flex;
   justify-content: flex-end;
 }
 
+/* ============================================================================ */
+/* WEATHER SECTION - DYNAMIC BACKGROUNDS WITH REAL-TIME ANIMATIONS */
+/* ============================================================================ */
+
+/**
+ * Weather display section with dynamic animated backgrounds
+ * 
+ * Container for weather information with animated backgrounds that
+ * respond to real-time weather conditions. Uses CSS animations
+ * to create immersive visual experiences.
+ */
 .weather-section {
   width: 100%;
-  position: relative;
-  overflow: hidden;
+  position: relative;              /* Enable absolute positioning for backgrounds */
+  overflow: hidden;                /* Hide animation overflow */
   border-radius: 24px;
   box-shadow: var(--theme-shadows, 0 8px 32px rgba(0, 0, 0, 0.1));
   transition: all 1s ease-in-out;
 }
 
+/**
+ * Weather content overlay
+ * 
+ * Ensures content appears above animated backgrounds.
+ * Uses z-index layering for proper content visibility.
+ */
 .weather-content {
   position: relative;
-  z-index: 2;
+  z-index: 2;                      /* Above background animations */
   padding: 2rem;
   background: transparent;
 }
 
+/* ============================================================================ */
+/* BOTTOM SECTION - RESPONSIVE GRID LAYOUT */
+/* ============================================================================ */
+
+/**
+ * Bottom section with responsive grid layout
+ * 
+ * Contains main application functionality (playlists and settings).
+ * Uses CSS Grid with named areas for semantic layout.
+ * Adapts from single column (mobile) to two-column (desktop) layout.
+ */
 .bottom-section {
   display: grid;
   gap: 24px;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr;     /* Single column on mobile */
 }
 
+/**
+ * Playlist and settings sections
+ * 
+ * These containers will be repositioned by grid areas on larger screens.
+ */
 .playlist-section {
   width: 100%;
 }
@@ -75,17 +172,33 @@
   width: 100%;
 }
 
+/* ============================================================================ */
+/* WEATHER ANIMATION BACKGROUNDS - IMMERSIVE VISUAL EFFECTS */
+/* ============================================================================ */
+
+/**
+ * Base animated background layer
+ * 
+ * Provides foundation for all weather-specific animations.
+ * Positioned absolutely to cover entire weather section.
+ */
 .weather-background {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 1;
-  opacity: 0.3;
-  pointer-events: none;
+  z-index: 1;                     /* Behind content, above container */
+  opacity: 0.3;                   /* Subtle effect, doesn't overwhelm content */
+  pointer-events: none;           /* Doesn't interfere with user interaction */
 }
 
+/**
+ * RAIN ANIMATION - Diagonal rain drops with movement
+ * 
+ * Creates realistic rain effect using CSS gradients and transforms.
+ * Simulates rain drops falling diagonally across the screen.
+ */
 .weather-rain .weather-background {
   background: linear-gradient(transparent, transparent 80%, rgba(100, 149, 237, 0.1) 80%);
   background-size: 2px 15px;
@@ -97,6 +210,12 @@
   100% { background-position: 0% 100%; }
 }
 
+/**
+ * SNOW ANIMATION - Multiple snow layers with different sizes
+ * 
+ * Creates realistic snowfall using multiple radial gradients.
+ * Different background layers simulate varying snow particle sizes.
+ */
 .weather-snow .weather-background {
   background: 
     radial-gradient(2px 2px at 20% 30%, white, transparent),
@@ -112,6 +231,12 @@
   100% { background-position: 50px 50px, 60px 60px, 40px 40px, 80px 80px; }
 }
 
+/**
+ * CLEAR DAY ANIMATION - Rotating sun rays
+ * 
+ * Creates sun ray effect using conic gradients and rotation.
+ * Simulates warm, bright sunshine with gentle rotation.
+ */
 .weather-clear-day .weather-background {
   background: 
     radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.3) 20%, transparent 20%),
@@ -125,6 +250,12 @@
   100% { transform: rotate(360deg); }
 }
 
+/**
+ * CLEAR NIGHT ANIMATION - Twinkling stars
+ * 
+ * Creates starfield effect with twinkling animation.
+ * Uses opacity changes to simulate natural star twinkling.
+ */
 .weather-clear-night .weather-background {
   background: 
     radial-gradient(1px 1px at 20% 30%, white, transparent),
@@ -140,6 +271,12 @@
   50% { opacity: 0.6; }
 }
 
+/**
+ * CLOUDS ANIMATION - Drifting cloud formations
+ * 
+ * Creates realistic cloud movement using elliptical gradients.
+ * Simulates clouds drifting across the sky at different speeds.
+ */
 .weather-clouds .weather-background {
   background: 
     radial-gradient(ellipse 100px 30px at 20% 50%, rgba(200, 200, 200, 0.3), transparent),
@@ -154,6 +291,12 @@
   100% { background-position: calc(100% + 100px) 0%, calc(100% + 80px) 0%, calc(100% + 120px) 0%; }
 }
 
+/**
+ * THUNDERSTORM ANIMATION - Lightning flashes with rain
+ * 
+ * Combines rain animation with lightning flash effects.
+ * Uses multiple animations for complex weather simulation.
+ */
 .weather-thunderstorm .weather-background {
   background: 
     linear-gradient(transparent, transparent 80%, rgba(100, 149, 237, 0.2) 80%),
@@ -164,10 +307,16 @@
 
 @keyframes thunderstorm {
   0%, 90%, 100% { opacity: 0.3; }
-  1%, 3%, 5% { opacity: 1; filter: brightness(2); }
+  1%, 3%, 5% { opacity: 1; filter: brightness(2); }  /* Lightning flashes */
   2%, 4% { opacity: 0.5; }
 }
 
+/**
+ * MIST/FOG ANIMATION - Flowing mist effect
+ * 
+ * Creates atmospheric mist using elliptical gradients.
+ * Simulates gentle mist movement with opacity variations.
+ */
 .weather-mist .weather-background,
 .weather-fog .weather-background {
   background: 
@@ -183,6 +332,12 @@
   50% { background-position: 50px 0%, -30px 0%, 30px 0%; }
 }
 
+/**
+ * DUST/HAZE/SMOKE ANIMATION - Swirling particles
+ * 
+ * Creates dusty/hazy atmosphere using diagonal gradients.
+ * Simulates particles swirling in different directions.
+ */
 .weather-dust .weather-background,
 .weather-haze .weather-background,
 .weather-smoke .weather-background {
@@ -198,7 +353,12 @@
   100% { background-position: 100% 100%, -100% 100%; }
 }
 
-
+/**
+ * DRIZZLE ANIMATION - Light scattered raindrops
+ * 
+ * Creates gentle drizzle effect with small scattered drops.
+ * Lighter and more subtle than heavy rain animation.
+ */
 .weather-drizzle .weather-background {
   background: 
     radial-gradient(1px 1px at 20% 30%, rgba(100, 149, 237, 0.2), transparent),
@@ -213,6 +373,12 @@
   100% { background-position: 30px 30px, 40px 40px, 35px 35px; }
 }
 
+/**
+ * ASH/TORNADO ANIMATION - Spinning vortex effect
+ * 
+ * Creates dramatic spinning effect for extreme weather.
+ * Uses conic gradients with rotation for tornado simulation.
+ */
 .weather-ash .weather-background,
 .weather-tornado .weather-background {
   background: 
@@ -227,9 +393,19 @@
   100% { transform: rotate(360deg); }
 }
 
+/* ============================================================================ */
+/* RESPONSIVE DESIGN - TABLET AND DESKTOP LAYOUTS */
+/* ============================================================================ */
+
+/**
+ * Tablet and desktop layout adjustments
+ * 
+ * Transforms single-column mobile layout into two-column desktop layout.
+ * Uses CSS Grid areas for semantic layout management.
+ */
 @media (min-width: 768px) {
   .bottom-section {
-    grid-template-columns: 3fr 1fr;
+    grid-template-columns: 3fr 1fr;    /* Playlist takes 3/4, settings takes 1/4 */
     grid-template-areas: "playlist settings";
   }
   
@@ -242,6 +418,16 @@
   }
 }
 
+/* ============================================================================ */
+/* LOADING AND ERROR STATES - USER FEEDBACK INTERFACES */
+/* ============================================================================ */
+
+/**
+ * Loading state interface with animated spinner
+ * 
+ * Provides user feedback during application initialization.
+ * Uses dynamic theming for consistent visual experience.
+ */
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -254,6 +440,12 @@
   transition: background 1s ease-in-out;
 }
 
+/**
+ * Animated loading spinner
+ * 
+ * CSS-only spinning animation with dynamic theming.
+ * More performant than JavaScript-based animations.
+ */
 .loading-container .loading-spinner {
   width: 60px;
   height: 60px;
@@ -264,6 +456,11 @@
   margin-bottom: 1rem;
 }
 
+/**
+ * Loading state typography
+ * 
+ * Hierarchical text styling for loading feedback.
+ */
 .loading-container p {
   font-size: 1.2rem;
   font-weight: 500;
@@ -276,6 +473,12 @@
   opacity: 0.7;
 }
 
+/**
+ * Error state interface with recovery options
+ * 
+ * User-friendly error display with actionable recovery button.
+ * Maintains consistent theming even in error states.
+ */
 .error-container {
   display: flex;
   flex-direction: column;
@@ -304,6 +507,12 @@
   line-height: 1.6;
 }
 
+/**
+ * Retry button with interactive feedback
+ * 
+ * Glassmorphism button design with hover animations.
+ * Provides clear call-to-action for error recovery.
+ */
 .retry-btn {
   background: var(--theme-accent, linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)) !important;
   color: white;
@@ -322,7 +531,16 @@
   box-shadow: 0 8px 30px rgba(139, 92, 246, 0.4);
 }
 
+/* ============================================================================ */
+/* DYNAMIC THEMING - CSS CUSTOM PROPERTY INTEGRATION */
+/* ============================================================================ */
 
+/**
+ * Dynamic theming system integration
+ * 
+ * Applies weather-based theming to all major components.
+ * Uses CSS custom properties for real-time theme updates.
+ */
 .header-section,
 .weather-info-section,
 .card-container,
@@ -334,6 +552,12 @@
   transition: all 1s ease-in-out;
 }
 
+/**
+ * Text color theming
+ * 
+ * Applies consistent text color theming across components.
+ * Primary text for headers and important content.
+ */
 .header-title h1,
 .city,
 .card-header,
@@ -345,6 +569,12 @@
   transition: color 1s ease-in-out;
 }
 
+/**
+ * Secondary text color theming
+ * 
+ * Applies subtle text colors for supporting content.
+ * Creates visual hierarchy while maintaining readability.
+ */
 .weather-description,
 .card-container p,
 .playlists-container p,
@@ -356,6 +586,15 @@
   transition: color 1s ease-in-out;
 }
 
+/* ============================================================================ */
+/* ANIMATIONS AND TRANSITIONS */
+/* ============================================================================ */
+
+/**
+ * Fade-in animation for smooth page loads
+ * 
+ * Creates polished entrance effect for application components.
+ */
 .fade-in {
   animation: fadeIn 0.5s ease-in;
 }
@@ -365,11 +604,22 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/**
+ * Spinning animation for loading indicators
+ * 
+ * Reusable spinning animation for various loading states.
+ */
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
+/**
+ * Development theme indicator
+ * 
+ * Shows current theme information during development.
+ * Hidden in production builds.
+ */
 .theme-indicator {
   position: fixed;
   top: 10px;
@@ -390,20 +640,30 @@
   transform: scale(1.05);
 }
 
+/* ============================================================================ */
+/* MOBILE RESPONSIVE DESIGN */
+/* ============================================================================ */
+
+/**
+ * Mobile layout adjustments (768px and below)
+ * 
+ * Optimizes layout and typography for mobile devices.
+ * Adjusts spacing, sizing, and positioning for touch interfaces.
+ */
 @media (max-width: 768px) {
   .header-section {
-    flex-direction: column;
+    flex-direction: column;        /* Stack header elements vertically */
     gap: 1rem;
     padding: 1rem;
   }
   
   .header-title h1 {
-    font-size: 2.5rem;
+    font-size: 2.5rem;            /* Smaller title for mobile */
   }
   
   .header-actions {
     min-width: auto;
-    justify-content: center;
+    justify-content: center;       /* Center actions on mobile */
   }
   
   .app-container {
@@ -416,7 +676,7 @@
   }
   
   .theme-indicator {
-    position: relative;
+    position: relative;            /* Reposition indicator for mobile */
     top: auto;
     right: auto;
     margin: 0 auto 1rem;
@@ -425,9 +685,14 @@
   }
 }
 
+/**
+ * Small mobile layout adjustments (480px and below)
+ * 
+ * Further optimizations for small screens and older devices.
+ */
 @media (max-width: 480px) {
   .header-title h1 {
-    font-size: 2rem;
+    font-size: 2rem;              /* Even smaller title for small screens */
   }
   
   .app-container {
@@ -440,6 +705,16 @@
   }
 }
 
+/* ============================================================================ */
+/* ACCESSIBILITY AND PERFORMANCE OPTIMIZATIONS */
+/* ============================================================================ */
+
+/**
+ * Reduced motion support for accessibility
+ * 
+ * Respects user preference for reduced motion.
+ * Disables animations for users with vestibular disorders.
+ */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -454,6 +729,12 @@
   }
 }
 
+/**
+ * High contrast mode support
+ * 
+ * Improves accessibility for users with visual impairments.
+ * Increases border contrast and background opacity.
+ */
 @media (prefers-contrast: high) {
   .header-section,
   .weather-info-section,
@@ -464,4 +745,3 @@
     background: rgba(0, 0, 0, 0.8) !important;
   }
 }
-

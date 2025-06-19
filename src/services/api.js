@@ -1,31 +1,92 @@
-
-// Rewritten Spotify API for post-November 2024 restrictions
-// Uses only Search endpoint instead of removed Recommendations endpoint
+/**
+ * Spotify API Integration Service
+ * 
+ * This service handles all Spotify Web API interactions for the WeatherBeats application.
+ * It implements a sophisticated search-based music recommendation system that generates
+ * weather-appropriate playlists by strategically querying Spotify's catalog.
+ * 
+ * Core Features:
+ * - OAuth 2.0 authentication with PKCE for secure user authorization
+ * - Search-based music discovery and recommendation algorithms
+ * - Regional market handling for optimal content availability
+ * - Rate limiting and API restriction management
+ * - Weather-based music recommendation engine
+ * - User playlist creation and management
+ * 
+ * Technical Architecture:
+ * - Uses Client Credentials flow for public catalog access
+ * - Uses Authorization Code flow with PKCE for user-specific operations
+ * - Implements intelligent caching and token management
+ * - Provides fallback strategies for regional content restrictions
+ * 
+ * @author Your Name
+ * @version 1.0.0
+ */
 
 export class SpotifyAuth {
+    /**
+     * Initialize Spotify API service with OAuth 2.0 configuration
+     * 
+     * Sets up the necessary credentials and endpoints for both public catalog
+     * access and user-specific operations like playlist creation.
+     */
     constructor() {
+        // OAuth 2.0 Configuration from environment variables
         this.clientId = import.meta.env.VITE_SPOTIFY_API_KEY;
         this.clientSecret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
         this.redirectUri = 'https://weatherbeatz.netlify.app/';
+        
+        // Comprehensive permissions for full app functionality
         this.scope = 'playlist-modify-public playlist-modify-private user-read-private user-read-email user-library-read user-top-read playlist-read-private user-read-recently-played';
+        
+        // Spotify Web API base URL
         this.baseUrl = 'https://api.spotify.com/v1';
     }
 
-    // Generate random string for PKCE
+    // ========================================================================
+    // PKCE SECURITY IMPLEMENTATION
+    // ========================================================================
+
+    /**
+     * Generate cryptographically secure random string for PKCE
+     * 
+     * PKCE (Proof Key for Code Exchange) adds security to OAuth 2.0 flows
+     * in public client applications by using dynamic secrets instead of
+     * static client secrets that could be compromised.
+     * 
+     * @param {number} length - Length of random string to generate
+     * @returns {string} Cryptographically secure random string
+     */
     generateRandomString(length) {
         const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         const values = crypto.getRandomValues(new Uint8Array(length));
         return values.reduce((acc, x) => acc + possible[x % possible.length], "");
     }
 
-    // Create SHA256 hash and base64url encode
+    /**
+     * Create SHA256 hash for PKCE code challenge
+     * 
+     * The code challenge is derived from the code verifier using SHA256 hashing.
+     * This allows the authorization server to verify the client's identity
+     * without the client secret being exposed in the browser.
+     * 
+     * @returns {Promise<ArrayBuffer>} SHA256 hash
+     */
     async sha256(plain) {
         const encoder = new TextEncoder();
         const data = encoder.encode(plain);
         return window.crypto.subtle.digest('SHA-256', data);
     }
 
-    // Base64url encode
+    /**
+     * Encode hash as base64url for PKCE code challenge
+     * 
+     * Base64url encoding is URL-safe base64 without padding.
+     * Required format for PKCE code challenges in OAuth 2.0.
+     * 
+     * @param {ArrayBuffer} str - SHA256 hash to encode
+     * @returns {string} Base64url encoded string
+     */
     base64urlencode(str) {
         return btoa(String.fromCharCode.apply(null, [...new Uint8Array(str)]))
             .replace(/\+/g, '-')
@@ -33,12 +94,25 @@ export class SpotifyAuth {
             .replace(/=+$/, '');
     }
 
-    // Detect user's likely market/region
+    // ========================================================================
+    // REGIONAL MARKET DETECTION AND OPTIMIZATION
+    // ========================================================================
+
+    /**
+     * Detect user's likely Spotify market based on browser language
+     * 
+     * Spotify content availability varies by geographic region due to licensing.
+     * By detecting the user's market, we can optimize search results to show
+     * tracks that are actually available to them, improving playlist quality.
+     * 
+     * @returns {string} Two-letter market code (ISO 3166-1 alpha-2)
+     */
     detectUserMarket() {
         try {
             const language = navigator.language || navigator.userLanguage || 'en-US';
             const locale = language.toLowerCase();
             
+            // Map browser locales to Spotify market codes
             const marketMap = {
                 'en-us': 'US', 'en-gb': 'GB', 'en-ca': 'CA', 'en-au': 'AU',
                 'fr-fr': 'FR', 'fr-ca': 'CA', 'de-de': 'DE', 'de-at': 'DE',
@@ -60,7 +134,14 @@ export class SpotifyAuth {
         }
     }
 
-    // Get market strategy prioritizing user's region
+    /**
+     * Create prioritized list of markets for search fallbacks
+     * 
+     * If search fails in user's primary market, this provides alternative markets
+     * to try. Ordered by content availability and global accessibility.
+     * 
+     * @returns {Array<string>} Prioritized array of market codes
+     */
     getMarketStrategy(userMarket = 'US') {
         const globalMarkets = ['US', 'GB', 'CA', 'AU', 'DE', 'FR', 'ES', 'IT', 'NL', 'SE', 'NO', 'DK', 'FI', 'BR', 'MX', 'JP'];
         
@@ -74,7 +155,19 @@ export class SpotifyAuth {
         return markets;
     }
 
-    // Client Credentials Flow
+    // ========================================================================
+    // CLIENT CREDENTIALS FLOW - PUBLIC API ACCESS
+    // ========================================================================
+
+    /**
+     * Obtain access token using Client Credentials flow
+     * 
+     * This flow provides access to Spotify's public catalog for search operations.
+     * Used for the core music discovery functionality that doesn't require
+     * user-specific permissions.
+     * 
+     * @returns {Promise<string>} Client credentials access token
+     */
     async getClientCredentialsToken() {
         console.log('🔑 Getting client credentials token...');
         
@@ -102,7 +195,7 @@ export class SpotifyAuth {
 
             const data = await response.json();
             
-            // Store in sessionStorage and memory
+            // Store in sessionStorage and memory for performance and persistence
             sessionStorage.setItem('spotify_client_access_token', data.access_token);
             sessionStorage.setItem('spotify_client_token_expiry', (Date.now() + (data.expires_in * 1000)).toString());
             
@@ -118,7 +211,14 @@ export class SpotifyAuth {
         }
     }
 
-    // Get valid client credentials token
+    /**
+     * Get valid client credentials token with automatic renewal
+     * 
+     * Checks token validity and automatically renews if expired.
+     * Implements dual caching (memory + sessionStorage) for optimal performance.
+     * 
+     * @returns {Promise<string>} Valid client credentials access token
+     */
     async getValidClientToken() {
         // Check memory first, then sessionStorage
         let accessToken = this.clientAccessToken || sessionStorage.getItem('spotify_client_access_token');
@@ -136,13 +236,22 @@ export class SpotifyAuth {
         return await this.getClientCredentialsToken();
     }
 
-    // Start the authorization flow
+    // ========================================================================
+    // USER AUTHORIZATION FLOW - OAUTH 2.0 WITH PKCE
+    // ========================================================================
+
+    /**
+     * Start OAuth 2.0 authorization flow with PKCE
+     * 
+     * Initiates user authentication for playlist creation and account access.
+     * Uses PKCE for enhanced security in browser-based applications.
+     */
     async authorize() {
         const codeVerifier = this.generateRandomString(64);
         const hashed = await this.sha256(codeVerifier);
         const codeChallenge = this.base64urlencode(hashed);
 
-        // Store code verifier in sessionStorage (survives page redirect)
+        // Store code verifier for later token exchange
         sessionStorage.setItem('spotify_code_verifier', codeVerifier);
 
         const authUrl = new URL("https://accounts.spotify.com/authorize");
@@ -159,7 +268,14 @@ export class SpotifyAuth {
         window.location.href = authUrl.toString();
     }
 
-    // Exchange authorization code for access token
+    /**
+     * Exchange authorization code for access token
+     * 
+     * Completes the OAuth flow by exchanging the authorization code
+     * received from Spotify for usable access and refresh tokens.
+     * 
+     * @returns {Promise<string>} User access token
+     */
     async getAccessToken(code) {
         const codeVerifier = sessionStorage.getItem('spotify_code_verifier');
         
@@ -183,14 +299,13 @@ export class SpotifyAuth {
 
         if (!response.ok) {
             const errorText = await response.text();
-            // Clear the invalid code verifier
             sessionStorage.removeItem('spotify_code_verifier');
             throw new Error(`Failed to get access token: ${response.status} - ${errorText}`);
         }
 
         const data = await response.json();
         
-        // Store tokens in sessionStorage for persistence across page reloads
+        // Store tokens for persistence across page reloads
         sessionStorage.setItem('spotify_access_token', data.access_token);
         sessionStorage.setItem('spotify_refresh_token', data.refresh_token);
         sessionStorage.setItem('spotify_token_expiry', (Date.now() + (data.expires_in * 1000)).toString());
@@ -200,13 +315,20 @@ export class SpotifyAuth {
         this.refreshToken = data.refresh_token;
         this.tokenExpiry = Date.now() + (data.expires_in * 1000);
         
-        // Clean up code verifier
+        // Clean up one-time code verifier
         sessionStorage.removeItem('spotify_code_verifier');
 
         return data.access_token;
     }
 
-    // Refresh access token
+    /**
+     * Refresh expired user access token
+     * 
+     * Automatically renews user access tokens using the refresh token.
+     * Provides seamless experience without requiring re-authentication.
+     * 
+     * @returns {Promise<string>} New access token
+     */
     async refreshAccessToken() {
         let refreshToken = this.refreshToken || sessionStorage.getItem('spotify_refresh_token');
         
@@ -250,14 +372,21 @@ export class SpotifyAuth {
         return data.access_token;
     }
 
-    // Get current valid access token
+    /**
+     * Get current valid user access token with automatic refresh
+     * 
+     * Primary method for obtaining user tokens throughout the application.
+     * Handles token validation and automatic renewal seamlessly.
+     * 
+     * @returns {Promise<string>} Valid user access token
+     */
     async getValidAccessToken() {
         // Check memory first, then sessionStorage
         let accessToken = this.accessToken || sessionStorage.getItem('spotify_access_token');
         let tokenExpiry = this.tokenExpiry || parseInt(sessionStorage.getItem('spotify_token_expiry') || '0');
 
         if (accessToken && tokenExpiry && Date.now() < tokenExpiry) {
-            // Update memory cache if it was loaded from sessionStorage
+            // Update memory cache if loaded from sessionStorage
             if (!this.accessToken) {
                 this.accessToken = accessToken;
                 this.tokenExpiry = tokenExpiry;
@@ -273,7 +402,11 @@ export class SpotifyAuth {
         }
     }
 
-    // Check if user is logged in
+    /**
+     * Check if user is currently authenticated
+     * 
+     * @returns {boolean} True if user has valid authentication
+     */
     isLoggedIn() {
         const accessToken = this.accessToken || sessionStorage.getItem('spotify_access_token');
         const tokenExpiry = this.tokenExpiry || parseInt(sessionStorage.getItem('spotify_token_expiry') || '0');
@@ -281,7 +414,9 @@ export class SpotifyAuth {
         return accessToken && tokenExpiry && Date.now() < tokenExpiry;
     }
 
-    // Logout
+    /**
+     * Clear all authentication tokens and log out user
+     */
     logout() {
         // Clear memory
         this.accessToken = null;
@@ -299,7 +434,18 @@ export class SpotifyAuth {
         sessionStorage.removeItem('spotify_client_token_expiry');
     }
 
-    // Enhanced search with better error handling
+    // ========================================================================
+    // SEARCH API - MUSIC DISCOVERY ENGINE
+    // ========================================================================
+
+    /**
+     * Search Spotify catalog for tracks with enhanced error handling
+     * 
+     * Core search functionality that powers the recommendation system.
+     * Includes regional market optimization and comprehensive error handling
+     * to ensure reliable music discovery across different geographic regions.
+     * 
+     */
     async searchTracks(query, limit = 20, market = 'US') {
         console.log(`🔍 Searching for: "${query}" in market: ${market}`);
         
@@ -355,7 +501,24 @@ export class SpotifyAuth {
         }
     }
 
-    // MAIN METHOD: Search-based playlist generation (replaces getRecommendations)
+    // ========================================================================
+    // INTELLIGENT RECOMMENDATION ENGINE
+    // ========================================================================
+
+    /**
+     * Generate weather-based music recommendations using search algorithms
+     * 
+     * This is the core recommendation engine that creates personalized playlists
+     * based on weather conditions. Uses a sophisticated multi-strategy approach:
+     * 
+     * 1. Maps weather to music characteristics (genres, moods, artists)
+     * 2. Generates diverse search queries from multiple angles
+     * 3. Executes searches across regional markets for availability
+     * 4. Filters results for quality and appropriateness
+     * 5. Ensures artist variety and removes duplicates
+     * 6. Applies user preferences (explicit content filtering)
+     * 
+     */
     async getRecommendations(weatherMain, limit = 25, allowExplicit = true) {
         console.log('=== SEARCH-BASED PLAYLIST GENERATION ===');
         console.log(`🌍 Weather: ${weatherMain}, Target: ${limit} tracks, Allow Explicit: ${allowExplicit}`);
@@ -460,7 +623,17 @@ export class SpotifyAuth {
         }
     }
 
-    // Build comprehensive search queries based on weather
+    // ========================================================================
+    // SEARCH STRATEGY AND QUERY GENERATION
+    // ========================================================================
+
+    /**
+     * Build comprehensive search queries based on weather and music strategy
+     * 
+     * Creates diverse search queries from multiple angles to ensure variety
+     * and comprehensive coverage of appropriate music for the weather condition.
+     * 
+     */
     buildSearchQueries(strategy, weatherMain) {
         const queries = [];
         
@@ -514,7 +687,13 @@ export class SpotifyAuth {
         return this.shuffleArray(queries);
     }
 
-    // Filter tracks by quality metrics
+    /**
+     * Filter tracks by quality metrics
+     * 
+     * Removes low-quality tracks based on duration, popularity, and content type.
+     * Ensures the final playlist contains only appropriate, well-formed tracks.
+     * 
+     */
     filterTracksByQuality(tracks) {
         return tracks.filter(track => {
             if (!track || !track.id || !track.name || !track.artists || track.artists.length === 0) {
@@ -543,7 +722,13 @@ export class SpotifyAuth {
         });
     }
 
-    // Ensure artist variety in final selection
+    /**
+     * Ensure artist variety in final selection
+     * 
+     * Prevents playlist from being dominated by any single artist.
+     * Limits tracks per artist while maintaining randomness in selection.
+     * 
+     */
     ensureArtistVariety(tracks) {
         const artistCount = {};
         const varietyTracks = [];
@@ -566,7 +751,14 @@ export class SpotifyAuth {
         return varietyTracks;
     }
 
-    // Enhanced weather search strategies
+    /**
+     * Get weather-specific search strategies
+     * 
+     * Maps weather conditions to musical characteristics including genres,
+     * moods, representative artists, and thematic keywords. This is the
+     * core intelligence that connects weather to appropriate music.
+     * 
+     */
     getWeatherSearchStrategies(weatherMain) {
         const weather = weatherMain.toLowerCase();
         
@@ -612,7 +804,17 @@ export class SpotifyAuth {
         return strategies[weather] || strategies.clear;
     }
 
-    // Utility methods
+    // ========================================================================
+    // UTILITY METHODS
+    // ========================================================================
+
+    /**
+     * Remove duplicate tracks from collection
+     * 
+     * Filters out tracks with same ID or same artist-title combination
+     * to ensure playlist variety and prevent repetition.
+     * 
+     */
     removeDuplicates(tracks) {
         const seen = new Set();
         const seenCombos = new Set();
@@ -631,6 +833,12 @@ export class SpotifyAuth {
         });
     }
 
+    /**
+     * Shuffle array using Fisher-Yates algorithm
+     * 
+     * Randomizes array order for playlist variety and unpredictability.
+     * 
+     */
     shuffleArray(array) {
         const shuffled = [...array];
         for (let i = shuffled.length - 1; i > 0; i--) {
@@ -640,11 +848,28 @@ export class SpotifyAuth {
         return shuffled;
     }
 
+    /**
+     * Delay execution for rate limiting
+     * 
+     * Prevents API rate limiting by introducing controlled delays
+     * between requests to respect Spotify's usage policies.
+     * 
+     */
     delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    // User profile methods (unchanged)
+    // ========================================================================
+    // USER PROFILE AND PLAYLIST MANAGEMENT
+    // ========================================================================
+
+    /**
+     * Get user's Spotify profile information
+     * 
+     * Retrieves user profile data needed for playlist creation.
+     * Requires user authentication via OAuth.
+     * 
+     */
     async getUserProfile() {
         const accessToken = await this.getValidAccessToken();
         if (!accessToken) {
@@ -668,7 +893,12 @@ export class SpotifyAuth {
         }
     }
 
-    // Create playlist (unchanged)
+    /**
+     * Create new playlist in user's Spotify account
+     * 
+     * Creates a playlist with weather-themed name and description.
+     * Sets appropriate privacy level based on user preference.
+     */
     async createPlaylist(userId, name, description = '', isPublic = false) {
         const accessToken = await this.getValidAccessToken();
         if (!accessToken) {
@@ -701,7 +931,12 @@ export class SpotifyAuth {
         }
     }
 
-    // Add tracks to playlist (unchanged)
+    /**
+     * Add tracks to existing playlist
+     * 
+     * Populates the created playlist with the generated tracks.
+     * Handles batch addition of track URIs to the playlist.
+     */
     async addTracksToPlaylist(playlistId, trackUris) {
         const accessToken = await this.getValidAccessToken();
         if (!accessToken) {
@@ -733,9 +968,27 @@ export class SpotifyAuth {
     }
 }
 
-// Weather API (unchanged)
+// ============================================================================
+// WEATHER API INTEGRATION
+// ============================================================================
+
+/**
+ * Weather API configuration
+ * 
+ * Uses OpenWeatherMap API to get current weather conditions
+ * that drive the music recommendation algorithm.
+ */
 const weather_API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
 
+/**
+ * Fetch current weather data for given coordinates
+ * 
+ * Retrieves weather information from OpenWeatherMap API using
+ * latitude and longitude coordinates from user's geolocation.
+ * 
+ * Weather data drives the entire music recommendation process
+ * by determining mood, energy level, and appropriate genres.
+ */
 export const getWeather = async (latitude, longitude) => {
     try {
         console.log(`🌤️ Fetching weather for coordinates: ${latitude}, ${longitude}`);

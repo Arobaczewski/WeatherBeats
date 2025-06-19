@@ -1,5 +1,47 @@
-/* Header.css - Updated styles for new button states */
+/**
+ * Header.css - Spotify Authentication Button Component
+ * 
+ * This stylesheet defines the sophisticated Spotify authentication interface
+ * that manages user login states and provides clear visual feedback for
+ * different connection states.
+ * 
+ * Key Features:
+ * - Multi-state button design (connected, disconnected, connecting)
+ * - Spotify brand integration with official colors and styling
+ * - Smooth state transitions and micro-animations
+ * - Accessible button design with proper touch targets
+ * - Responsive design that adapts to various screen sizes
+ * - Loading state animations with visual feedback
+ * 
+ * Design Philosophy:
+ * The authentication interface prioritizes clarity and user confidence
+ * by providing immediate visual feedback for connection states while
+ * maintaining consistency with Spotify's brand identity.
+ * 
+ * Technical Implementation:
+ * - CSS-only state management through class switching
+ * - Hardware-accelerated animations for smooth performance
+ * - Gradient backgrounds for visual appeal
+ * - Consistent button sizing to prevent layout shifts
+ * 
+ */
 
+/* ============================================================================ */
+/* BUTTON CONTAINER - LAYOUT FOUNDATION */
+/* ============================================================================ */
+
+/**
+ * Button container with centered layout
+ * 
+ * Provides consistent positioning and spacing for the authentication
+ * button within the header component. Uses flexbox for reliable
+ * centering across different screen sizes and content lengths.
+ * 
+ * Layout Features:
+ * - Flexbox centering for reliable positioning
+ * - Consistent padding for visual breathing room
+ * - Scalable layout that adapts to content changes
+ */
 .btn-container {
     display: flex;
     justify-content: center;
@@ -7,61 +49,178 @@
     padding: 1rem;
 }
 
+/* ============================================================================ */
+/* BASE BUTTON STYLING - FOUNDATION FOR ALL STATES */
+/* ============================================================================ */
+
+/**
+ * Base button styling for all authentication states
+ * 
+ * Establishes consistent foundation for all button states with
+ * Spotify brand integration and accessibility considerations.
+ * This base styling ensures visual consistency while allowing
+ * individual states to override specific properties.
+ * 
+ * Technical Features:
+ * - Consistent minimum width prevents layout shifts
+ * - Hardware-accelerated transitions for smooth state changes
+ * - Accessible touch target size (minimum 44px height)
+ * - Spotify brand color integration
+ * - Modern pill-shaped design with rounded corners
+ */
 .btn-connected,
 .btn-disconnected,
 .btn-connecting {
     background: linear-gradient(135deg, #1db954 0%, #1ed760 100%);
     border: none;
-    border-radius: 50px;
+    border-radius: 50px;                     /* Pill-shaped for modern look */
     color: white;
     cursor: pointer;
     font-size: 1rem;
     font-weight: 600;
     padding: 12px 24px;
-    transition: all 0.3s ease;
+    transition: all 0.3s ease;               /* Smooth state transitions */
     box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
-    min-width: 200px;
+    min-width: 200px;                        /* Prevents layout shift between states */
     text-align: center;
 }
 
+/* ============================================================================ */
+/* DISCONNECTED STATE - READY TO CONNECT */
+/* ============================================================================ */
+
+/**
+ * Disconnected state styling
+ * 
+ * Uses Spotify's brand colors with border treatment to indicate
+ * ready-to-connect state while maintaining visual hierarchy.
+ * The design clearly communicates that clicking will initiate
+ * the connection process.
+ * 
+ * Visual Design:
+ * - Dark background with Spotify green border
+ * - Green text color for brand consistency
+ * - Subtle shadow with brand color tinting
+ * - Clear visual distinction from connected state
+ */
 .btn-disconnected {
     background: linear-gradient(135deg, #191414 0%, #333 100%);
-    border: 2px solid #1db954;
-    color: #1db954;
+    border: 2px solid #1db954;              /* Spotify green border */
+    color: #1db954;                         /* Spotify green text */
     box-shadow: 0 4px 15px rgba(29, 185, 84, 0.2);
 }
 
+/**
+ * Disconnected button hover effects
+ * 
+ * Smooth transition to connected appearance on hover provides
+ * clear preview of interaction result. This helps users understand
+ * what will happen when they click the button.
+ * 
+ * Interaction Features:
+ * - Transforms to full Spotify green on hover
+ * - Subtle lift effect for tactile feedback
+ * - Enhanced shadow for depth perception
+ * - Smooth color transitions for polished feel
+ */
 .btn-disconnected:hover {
     background: linear-gradient(135deg, #1db954 0%, #1ed760 100%);
     color: white;
-    transform: translateY(-2px);
+    transform: translateY(-2px);             /* Subtle lift effect */
     box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
 }
 
+/* ============================================================================ */
+/* CONNECTED STATE - AUTHENTICATED SUCCESS */
+/* ============================================================================ */
+
+/**
+ * Connected state styling
+ * 
+ * Uses full Spotify green gradient to indicate successful connection
+ * with clear visual feedback for authenticated state. This state
+ * represents successful integration with Spotify's API.
+ * 
+ * Visual Design:
+ * - Full Spotify green gradient background
+ * - White text for optimal contrast
+ * - Enhanced shadow with brand color
+ * - Clear indication of successful authentication
+ */
 .btn-connected {
     background: linear-gradient(135deg, #1db954 0%, #1ed760 100%);
     color: white;
 }
 
+/**
+ * Connected button hover effects
+ * 
+ * Changes to logout/disconnect colors on hover to clearly indicate
+ * that clicking will disconnect from Spotify. This provides clear
+ * visual feedback about the action that will be performed.
+ * 
+ * Interaction Features:
+ * - Red gradient indicates disconnect action
+ * - Maintains lift effect for consistency
+ * - Color change clearly communicates intent
+ * - Smooth transition maintains polish
+ */
 .btn-connected:hover {
     background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
     box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
     transform: translateY(-2px);
 }
 
+/* ============================================================================ */
+/* CONNECTING STATE - LOADING FEEDBACK */
+/* ============================================================================ */
+
+/**
+ * Connecting/loading state styling
+ * 
+ * Uses amber colors to indicate in-progress authentication
+ * with disabled state to prevent multiple requests. This state
+ * provides clear feedback during the OAuth flow process.
+ * 
+ * Visual Design:
+ * - Amber/orange gradient for in-progress indication
+ * - Reduced opacity to suggest disabled state
+ * - Not-allowed cursor for clear user feedback
+ * - Animated pulse effect for loading indication
+ */
 .btn-connecting {
     background: linear-gradient(135deg, #ffa726 0%, #ff9800 100%);
     color: white;
-    cursor: not-allowed;
-    opacity: 0.8;
+    cursor: not-allowed;                     /* Clear indication of disabled state */
+    opacity: 0.8;                           /* Subtle opacity reduction */
     box-shadow: 0 4px 15px rgba(255, 167, 38, 0.3);
-    animation: pulse 2s infinite;
+    animation: pulse 2s infinite;            /* Animated loading indicator */
 }
 
+/**
+ * Ensuring disabled cursor state
+ * 
+ * Reinforces the disabled state when the button has the
+ * disabled attribute, providing consistent user feedback.
+ */
 .btn-connecting:disabled {
     cursor: not-allowed;
 }
 
+/**
+ * Pulse animation for connecting state
+ * 
+ * Provides visual feedback during authentication process with
+ * breathing shadow effect that indicates ongoing activity.
+ * The animation is subtle enough to not be distracting while
+ * clearly indicating that something is happening.
+ * 
+ * Animation Features:
+ * - 2-second cycle for gentle, non-intrusive feedback
+ * - Shadow intensity variation for breathing effect
+ * - Infinite loop during connection process
+ * - Hardware-accelerated for smooth performance
+ */
 @keyframes pulse {
     0% {
         box-shadow: 0 4px 15px rgba(255, 167, 38, 0.3);
@@ -74,23 +233,198 @@
     }
 }
 
-/* Responsive design */
+/* ============================================================================ */
+/* RESPONSIVE DESIGN - MOBILE OPTIMIZATION */
+/* ============================================================================ */
+
+/**
+ * Tablet and mobile layout adjustments (768px and below)
+ * 
+ * Optimizes button sizing and spacing for tablet and mobile devices
+ * while maintaining accessibility and visual appeal.
+ * 
+ * Mobile Optimizations:
+ * - Slightly smaller font size for mobile screens
+ * - Reduced padding while maintaining touch targets
+ * - Adjusted minimum width for mobile layouts
+ * - Preserved accessibility standards
+ */
 @media (max-width: 768px) {
     .btn-connected,
     .btn-disconnected,
     .btn-connecting {
-        font-size: 0.9rem;
-        padding: 10px 20px;
-        min-width: 180px;
+        font-size: 0.9rem;                  /* Slightly smaller font */
+        padding: 10px 20px;                 /* Reduced padding */
+        min-width: 180px;                   /* Adjusted minimum width */
     }
 }
 
+/**
+ * Small mobile layout adjustments (480px and below)
+ * 
+ * Further optimizations for very small screens and older devices
+ * while ensuring the button remains functional and accessible.
+ * 
+ * Small Screen Optimizations:
+ * - Further reduced font size for compact screens
+ * - Minimal padding while maintaining usability
+ * - Compact minimum width for small layouts
+ * - Maintained touch target accessibility
+ */
 @media (max-width: 480px) {
     .btn-connected,
     .btn-disconnected,
     .btn-connecting {
-        font-size: 0.8rem;
-        padding: 8px 16px;
-        min-width: 160px;
+        font-size: 0.8rem;                  /* Compact font size */
+        padding: 8px 16px;                  /* Minimal padding */
+        min-width: 160px;                   /* Compact minimum width */
+    }
+}
+
+/* ============================================================================ */
+/* ACCESSIBILITY AND INTERACTION ENHANCEMENTS */
+/* ============================================================================ */
+
+/**
+ * Focus indicators for keyboard navigation
+ * 
+ * Provides clear visual indicators for users navigating with
+ * keyboard or assistive technologies. Uses consistent accent
+ * colors for focus indication.
+ */
+.btn-connected:focus,
+.btn-disconnected:focus,
+.btn-connecting:focus {
+    outline: 2px solid var(--theme-accent, #8b5cf6);
+    outline-offset: 2px;
+}
+
+/**
+ * Active state feedback
+ * 
+ * Provides tactile feedback when buttons are actively being
+ * pressed, enhancing the user's sense of interaction.
+ */
+.btn-connected:active,
+.btn-disconnected:active {
+    transform: translateY(0);               /* Return to base position when pressed */
+    transition: transform 0.1s ease;       /* Quick feedback for active state */
+}
+
+/**
+ * Disabled state overrides
+ * 
+ * Ensures that disabled buttons cannot be interacted with
+ * and provides appropriate visual feedback.
+ */
+.btn-connecting:active,
+.btn-connecting:hover {
+    transform: none;                        /* No interaction effects when disabled */
+    background: linear-gradient(135deg, #ffa726 0%, #ff9800 100%); /* Maintain connecting colors */
+}
+
+/* ============================================================================ */
+/* LOADING STATE ENHANCEMENTS */
+/* ============================================================================ */
+
+/**
+ * Enhanced loading state for better user feedback
+ * 
+ * Additional visual cues that reinforce the loading state
+ * and provide confidence that the system is working.
+ */
+.btn-connecting::after {
+    content: '';
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-left: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/**
+ * Spinning animation for loading indicator
+ * 
+ * Creates a subtle loading spinner that appears next to the
+ * connecting text, providing additional visual feedback.
+ */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ============================================================================ */
+/* PERFORMANCE OPTIMIZATIONS */
+/* ============================================================================ */
+
+/**
+ * Hardware acceleration for smooth animations
+ * 
+ * Ensures all button animations use GPU acceleration for
+ * smooth performance across devices.
+ */
+.btn-connected,
+.btn-disconnected,
+.btn-connecting {
+    will-change: transform, box-shadow;     /* Hint to browser for optimization */
+    backface-visibility: hidden;           /* Prevent flickering during animations */
+}
+
+/**
+ * Reduced motion accessibility support
+ * 
+ * Respects user preferences for reduced motion by disabling
+ * animations for users with vestibular disorders or motion sensitivity.
+ */
+@media (prefers-reduced-motion: reduce) {
+    .btn-connected,
+    .btn-disconnected,
+    .btn-connecting {
+        animation: none !important;
+        transition: none !important;
+    }
+    
+    .btn-connecting::after {
+        animation: none !important;
+    }
+}
+
+/* ============================================================================ */
+/* HIGH CONTRAST MODE SUPPORT */
+/* ============================================================================ */
+
+/**
+ * High contrast mode adaptations
+ * 
+ * Improves accessibility for users with visual impairments
+ * by providing enhanced contrast and border definition.
+ */
+@media (prefers-contrast: high) {
+    .btn-connected,
+    .btn-disconnected,
+    .btn-connecting {
+        border: 2px solid currentColor !important;
+        box-shadow: none !important;
+    }
+    
+    .btn-disconnected {
+        background: black !important;
+        color: #1db954 !important;
+        border-color: #1db954 !important;
+    }
+    
+    .btn-connected {
+        background: #1db954 !important;
+        color: white !important;
+        border-color: white !important;
+    }
+    
+    .btn-connecting {
+        background: #ff9800 !important;
+        color: black !important;
+        border-color: black !important;
     }
 }

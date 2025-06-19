@@ -1,18 +1,80 @@
+/**
+ * Playlists.css - Music Player Interface and Interactive Design System
+ * 
+ * This stylesheet defines the sophisticated music playlist interface that serves
+ * as the core user interaction area of the WeatherBeats application. It implements:
+ * 
+ * - Rich music track display with metadata and album artwork
+ * - Interactive buttons with micro-animations and feedback
+ * - Responsive pagination system for large playlists
+ * - Dynamic loading states and error handling interfaces
+ * - Spotify integration visual elements
+ * - Weather-responsive animations and mood-based effects
+ * - Mobile-optimized touch interfaces
+ * 
+ * Design Philosophy:
+ * The interface prioritizes music discovery and interaction with glassmorphism
+ * design, smooth animations, and intuitive user feedback. Every element is
+ * designed to enhance the music listening experience while maintaining
+ * accessibility and performance.
+ * 
+ * Technical Features:
+ * - Hardware-accelerated animations for smooth performance
+ * - Responsive design that adapts to various screen sizes
+ * - Focus management for keyboard navigation
+ * - Color-coded feedback for different interaction states
+ * 
+ */
+
+/* ============================================================================ */
+/* MAIN PLAYLIST CONTAINER - GLASSMORPHISM FOUNDATION */
+/* ============================================================================ */
+
+/**
+ * Primary playlist container with glassmorphism design
+ * 
+ * Implements modern glassmorphism aesthetic with semi-transparent backgrounds,
+ * backdrop blur effects, and dynamic theming integration. The container adapts
+ * to weather-based theme changes while maintaining readability and visual appeal.
+ * 
+ * Design Features:
+ * - Semi-transparent background with backdrop blur
+ * - Dynamic theme integration via CSS custom properties
+ * - Smooth hover animations for enhanced interactivity
+ * - Rounded corners for modern, friendly appearance
+ */
 .playlists-container {
-  grid-area: playlists;
+  grid-area: playlists;                    /* CSS Grid positioning */
   background: var(--theme-card-bg, rgba(255, 255, 255, 0.15));
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);             /* Glassmorphism effect */
   border-radius: 24px;
   padding: 2rem;
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: var(--theme-shadows, 0 8px 32px rgba(0, 0, 0, 0.1));
-  transition: all 1s ease-in-out;
+  transition: all 1s ease-in-out;         /* Smooth theme transitions */
 }
 
+/**
+ * Hover effects for enhanced interactivity
+ * 
+ * Subtle lift animation on hover provides immediate visual feedback
+ * and creates a sense of depth and responsiveness.
+ */
 .playlists-container:hover {
   transform: translateY(-2px);
 }
 
+/* ============================================================================ */
+/* TYPOGRAPHY HIERARCHY - SEMANTIC TEXT STYLING */
+/* ============================================================================ */
+
+/**
+ * Primary and secondary headings with dynamic theming
+ * 
+ * Creates clear visual hierarchy while integrating with the dynamic
+ * weather-based theming system. Text shadows add depth and improve
+ * readability over complex backgrounds.
+ */
 .playlists-container h2,
 .playlists-container h3 {
   color: var(--theme-text-primary, white);
@@ -23,13 +85,19 @@
 }
 
 .playlists-container h2 {
-  font-size: 2rem;
+  font-size: 2rem;                        /* Main section title */
 }
 
 .playlists-container h3 {
-  font-size: 1.5rem;
+  font-size: 1.5rem;                      /* Subsection titles */
 }
 
+/**
+ * Body text styling with accessibility considerations
+ * 
+ * Optimized for readability with appropriate line height and color contrast.
+ * Integrates with dynamic theming for consistent visual experience.
+ */
 .playlists-container p {
   color: var(--theme-text-secondary, rgba(255, 255, 255, 0.9));
   margin-bottom: 1.5rem;
@@ -37,12 +105,27 @@
   transition: color 1s ease-in-out;
 }
 
+/* ============================================================================ */
+/* INFORMATION PANELS - STATUS AND FEEDBACK SYSTEM */
+/* ============================================================================ */
+
+/**
+ * API status and generation information panels
+ * 
+ * Provides transparent feedback about application state and generation process.
+ * Uses color-coded backgrounds to communicate different types of information.
+ * 
+ * Design Pattern:
+ * - Consistent layout with icon + text structure
+ * - Semi-transparent backgrounds with backdrop blur
+ * - Color coding for different information types
+ */
 .api-status-info,
 .generation-info {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(245, 158, 11, 0.1);
+  background: rgba(245, 158, 11, 0.1);     /* Warning/info color */
   border: 1px solid rgba(245, 158, 11, 0.3);
   padding: 12px 16px;
   border-radius: 12px;
@@ -50,6 +133,11 @@
   backdrop-filter: blur(10px);
 }
 
+/**
+ * Text styling within information panels
+ * 
+ * Ensures readability and maintains consistency with overall design language.
+ */
 .api-status-info span,
 .generation-info span,
 .generation-info small {
@@ -58,15 +146,27 @@
   line-height: 1.4;
 }
 
+/**
+ * Generation-specific information panel
+ * 
+ * Uses blue color scheme to distinguish from warning/status information.
+ * Positioned strategically to provide context without interrupting workflow.
+ */
 .generation-info {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(59, 130, 246, 0.1);     /* Info blue color */
   border-color: rgba(59, 130, 246, 0.3);
   margin-top: 1rem;
   margin-bottom: 0;
 }
 
+/**
+ * Generation statistics panel
+ * 
+ * Displays detailed information about the playlist generation process.
+ * Uses green color scheme to indicate successful completion.
+ */
 .generation-stats {
-  background: rgba(16, 185, 129, 0.1);
+  background: rgba(16, 185, 129, 0.1);     /* Success green color */
   border: 1px solid rgba(16, 185, 129, 0.3);
   padding: 16px;
   border-radius: 16px;
@@ -81,12 +181,24 @@
   font-weight: 600;
 }
 
+/**
+ * Statistics grid layout
+ * 
+ * Responsive grid system for displaying generation metrics.
+ * Adapts from multi-column on desktop to single column on mobile.
+ */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 12px;
 }
 
+/**
+ * Individual statistic item styling
+ * 
+ * Each statistic is displayed in a card-like container with
+ * clear separation between label and value.
+ */
 .stat-item {
   display: flex;
   justify-content: space-between;
@@ -109,7 +221,19 @@
   font-size: 0.9rem;
 }
 
+/* ============================================================================ */
+/* INTERACTIVE BUTTONS - MICRO-ANIMATIONS AND FEEDBACK */
+/* ============================================================================ */
 
+/**
+ * Primary action buttons with gradient backgrounds and animations
+ * 
+ * Implements consistent button design language with:
+ * - Gradient backgrounds for visual appeal
+ * - Micro-animations for immediate feedback
+ * - Consistent spacing and typography
+ * - Accessible hover and focus states
+ */
 .playlists-btn,
 .regen-playlist-btn,
 .save-to-spotify-btn {
@@ -117,28 +241,40 @@
   color: white;
   border: none;
   padding: 14px 28px;
-  border-radius: 50px;
+  border-radius: 50px;                     /* Pill-shaped buttons */
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 8px;                               /* Space between icon and text */
   margin-right: 12px;
   margin-bottom: 12px;
   box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
 }
 
+/**
+ * Spotify-specific button styling
+ * 
+ * Uses Spotify's brand colors to create clear visual association
+ * with the music streaming platform.
+ */
 .save-to-spotify-btn {
   background: linear-gradient(135deg, #1db954 0%, #1ed760 100%);
   box-shadow: 0 4px 20px rgba(29, 185, 84, 0.3);
 }
 
+/**
+ * Button hover effects with enhanced shadows
+ * 
+ * Creates engaging micro-interactions that provide immediate feedback
+ * and encourage user interaction.
+ */
 .playlists-btn:hover,
 .regen-playlist-btn:hover,
 .save-to-spotify-btn:hover {
-  transform: translateY(-2px);
+  transform: translateY(-2px);             /* Subtle lift effect */
   box-shadow: 0 8px 30px rgba(139, 92, 246, 0.4);
 }
 
@@ -146,15 +282,30 @@
   box-shadow: 0 8px 30px rgba(29, 185, 84, 0.4);
 }
 
+/**
+ * Disabled button states
+ * 
+ * Provides clear visual feedback when buttons are not interactive.
+ * Prevents user confusion and maintains accessibility standards.
+ */
 .playlists-btn:disabled,
 .regen-playlist-btn:disabled,
 .save-to-spotify-btn:disabled {
   opacity: 0.7;
   cursor: not-allowed;
-  transform: none;
+  transform: none;                         /* No hover effects when disabled */
 }
 
+/* ============================================================================ */
+/* TRACK LIST INTERFACE - RICH MUSIC METADATA DISPLAY */
+/* ============================================================================ */
 
+/**
+ * Track list container with consistent spacing
+ * 
+ * Creates organized layout for music tracks with adequate spacing
+ * for comfortable scanning and interaction.
+ */
 .track-list {
   display: flex;
   flex-direction: column;
@@ -162,6 +313,15 @@
   margin-bottom: 2rem;
 }
 
+/**
+ * Individual track item with interactive design
+ * 
+ * Each track is displayed as an interactive card with:
+ * - Album artwork and metadata
+ * - Hover effects for enhanced feedback
+ * - Spotify integration links
+ * - Responsive layout adaptation
+ */
 .track-item {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(15px);
@@ -171,26 +331,50 @@
   transition: all 0.3s ease;
 }
 
+/**
+ * Track item hover effects
+ * 
+ * Enhances interactivity with subtle animations that draw attention
+ * to the currently focused track.
+ */
 .track-item:hover {
   background: rgba(255, 255, 255, 0.15);
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
+/**
+ * Track information layout
+ * 
+ * Flexible layout that adapts to different screen sizes while
+ * maintaining clear information hierarchy and visual balance.
+ */
 .track-info-row {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
+/**
+ * Track number styling
+ * 
+ * Provides track position context with consistent typography
+ * and proper spacing considerations.
+ */
 .track-number {
   color: var(--theme-text-secondary, rgba(255, 255, 255, 0.7));
   font-weight: 600;
-  min-width: 30px;
+  min-width: 30px;                        /* Consistent alignment */
   font-size: 1rem;
   transition: color 1s ease-in-out;
 }
 
+/**
+ * Album artwork with interactive effects
+ * 
+ * Displays album covers with subtle hover animations to enhance
+ * visual interest and provide tactile feedback.
+ */
 .album-art {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -198,17 +382,29 @@
 }
 
 .album-art:hover {
-  transform: scale(1.05);
+  transform: scale(1.05);                  /* Subtle zoom on hover */
 }
 
+/**
+ * Track details container
+ * 
+ * Flexible container for track metadata that adapts to available space
+ * while maintaining readability and visual hierarchy.
+ */
 .track-details {
-  flex: 1;
-  min-width: 0;
+  flex: 1;                                /* Take available space */
+  min-width: 0;                           /* Allow text truncation */
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
+/**
+ * Track name styling with explicit content indicators
+ * 
+ * Primary track information with support for explicit content badges
+ * and proper text overflow handling for long track names.
+ */
 .track-name {
   color: var(--theme-text-primary, white);
   font-weight: 600;
@@ -222,6 +418,12 @@
   transition: color 1s ease-in-out;
 }
 
+/**
+ * Artist information styling
+ * 
+ * Secondary metadata with proper hierarchy and text overflow handling.
+ * Supports multiple artists with comma separation.
+ */
 .track-artist {
   color: var(--theme-text-secondary, rgba(255, 255, 255, 0.7));
   font-size: 0.9rem;
@@ -231,16 +433,28 @@
   transition: color 1s ease-in-out;
 }
 
+/**
+ * Album name styling
+ * 
+ * Tertiary metadata with subtle styling to maintain hierarchy
+ * while providing complete track context.
+ */
 .track-album {
   color: var(--theme-text-secondary, rgba(255, 255, 255, 0.6));
   font-size: 0.8rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-style: italic;
+  font-style: italic;                     /* Distinguish from artist */
   transition: color 1s ease-in-out;
 }
 
+/**
+ * Track metadata container
+ * 
+ * Right-aligned container for duration and popularity information.
+ * Maintains consistent spacing and alignment across track items.
+ */
 .track-meta {
   display: flex;
   flex-direction: column;
@@ -249,6 +463,12 @@
   min-width: 80px;
 }
 
+/**
+ * Duration and popularity styling
+ * 
+ * Consistent styling for numerical metadata with proper hierarchy
+ * and subtle visual differences for different data types.
+ */
 .track-duration,
 .track-popularity {
   color: var(--theme-text-secondary, rgba(255, 255, 255, 0.7));
@@ -258,12 +478,18 @@
 }
 
 .track-popularity {
-  font-size: 0.75rem;
+  font-size: 0.75rem;                     /* Smaller for secondary info */
   opacity: 0.8;
 }
 
+/**
+ * Explicit content badge
+ * 
+ * Clear visual indicator for explicit content with high contrast
+ * for immediate recognition and parental guidance.
+ */
 .explicit-badge {
-  background: rgba(239, 68, 68, 0.8);
+  background: rgba(239, 68, 68, 0.8);     /* Red warning color */
   color: white;
   font-size: 0.7rem;
   font-weight: bold;
@@ -272,28 +498,47 @@
   text-transform: uppercase;
 }
 
+/**
+ * Spotify link button with brand integration
+ * 
+ * Interactive button that maintains Spotify's visual identity while
+ * integrating seamlessly with the application's design language.
+ */
 .spotify-link {
-  background: rgba(29, 185, 84, 0.2);
+  background: rgba(29, 185, 84, 0.2);     /* Spotify green with transparency */
   color: var(--theme-text-primary, white);
   border: 1px solid rgba(29, 185, 84, 0.4);
   padding: 12px;
-  border-radius: 50%;
+  border-radius: 50%;                     /* Circular button */
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  min-width: 44px;
+  min-width: 44px;                        /* Accessible touch target */
   height: 44px;
 }
 
+/**
+ * Spotify link hover effects
+ * 
+ * Enhanced feedback with color transitions and scaling effects
+ * that reinforce the connection to Spotify's platform.
+ */
 .spotify-link:hover {
   background: rgba(29, 185, 84, 0.3);
   border-color: rgba(29, 185, 84, 0.6);
   transform: scale(1.1);
 }
 
+/**
+ * Track source information (debugging/transparency)
+ * 
+ * Optional debugging information that shows which search query
+ * and market region provided each track. Useful for development
+ * and providing transparency about the recommendation algorithm.
+ */
 .track-source-info {
   margin-top: 12px;
   padding-top: 8px;
@@ -314,6 +559,16 @@
   opacity: 0.8;
 }
 
+/* ============================================================================ */
+/* PAGINATION SYSTEM - RESPONSIVE NAVIGATION */
+/* ============================================================================ */
+
+/**
+ * Pagination controls with consistent button design
+ * 
+ * Enables navigation through large playlists with clear visual
+ * feedback for current position and available pages.
+ */
 .page-numbers {
   display: flex;
   justify-content: center;
@@ -321,6 +576,12 @@
   margin-bottom: 1.5rem;
 }
 
+/**
+ * Individual page buttons
+ * 
+ * Consistent design language with hover effects and active states.
+ * Optimized for both mouse and touch interactions.
+ */
 .page-btn {
   background: rgba(255, 255, 255, 0.2);
   color: var(--theme-text-primary, white);
@@ -330,9 +591,15 @@
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: 500;
-  min-width: 40px;
+  min-width: 40px;                        /* Consistent button size */
 }
 
+/**
+ * Page button hover and active states
+ * 
+ * Clear feedback for user interaction with enhanced active state
+ * that clearly indicates current page position.
+ */
 .page-btn:hover,
 .page-btn.active {
   background: rgba(255, 255, 255, 0.3);
@@ -344,18 +611,38 @@
   box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
 }
 
+/* ============================================================================ */
+/* ACTION BUTTONS CONTAINER - ORGANIZED BUTTON LAYOUT */
+/* ============================================================================ */
+
+/**
+ * Playlist actions container
+ * 
+ * Organized layout for primary action buttons with responsive
+ * behavior and consistent spacing.
+ */
 .playlist-actions {
   display: flex;
   gap: 12px;
-  flex-wrap: wrap;
+  flex-wrap: wrap;                        /* Wrap on small screens */
   justify-content: center;
   margin-bottom: 1rem;
 }
 
+/* ============================================================================ */
+/* STATUS AND FEEDBACK INTERFACES */
+/* ============================================================================ */
+
+/**
+ * API information panel
+ * 
+ * Provides transparent communication about API usage and limitations.
+ * Uses consistent design language with other information panels.
+ */
 .api-info {
   text-align: center;
   padding: 16px;
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(59, 130, 246, 0.1);    /* Info blue background */
   border: 1px solid rgba(59, 130, 246, 0.2);
   border-radius: 12px;
   backdrop-filter: blur(10px);
@@ -367,10 +654,16 @@
   line-height: 1.4;
 }
 
+/**
+ * Error message styling with color-coded feedback
+ * 
+ * Provides clear error communication with appropriate color coding
+ * and visual hierarchy. Supports both error and success message types.
+ */
 .error-message {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(239, 68, 68, 0.1);     /* Error red background */
   border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #fecaca;
+  color: #fecaca;                         /* Light red text */
   padding: 16px;
   border-radius: 12px;
   margin-top: 1rem;
@@ -378,12 +671,24 @@
   font-weight: 500;
 }
 
+/**
+ * Success message variant
+ * 
+ * Uses green color scheme to indicate successful operations
+ * while maintaining consistent layout and typography.
+ */
 .error-message.success-info {
-  background: rgba(16, 185, 129, 0.1);
+  background: rgba(16, 185, 129, 0.1);    /* Success green background */
   border-color: rgba(16, 185, 129, 0.3);
-  color: #a7f3d0;
+  color: #a7f3d0;                         /* Light green text */
 }
 
+/**
+ * Loading spinner animation
+ * 
+ * Reusable spinning animation for loading states throughout
+ * the playlist interface.
+ */
 .loading-spinner {
   animation: spin 1s linear infinite;
 }
@@ -393,6 +698,16 @@
   to { transform: rotate(360deg); }
 }
 
+/* ============================================================================ */
+/* RESPONSIVE DESIGN - MOBILE OPTIMIZATION */
+/* ============================================================================ */
+
+/**
+ * Tablet and mobile layout adjustments (768px and below)
+ * 
+ * Adapts the interface for touch interactions and smaller screens
+ * while maintaining functionality and visual appeal.
+ */
 @media (max-width: 768px) {
   .playlists-container {
     padding: 1.5rem;
@@ -406,6 +721,12 @@
     font-size: 1.3rem;
   }
   
+  /**
+   * Mobile track layout reorganization
+   * 
+   * Restructures track information for vertical mobile layout
+   * while maintaining all essential information and functionality.
+   */
   .track-info-row {
     flex-wrap: wrap;
     gap: 12px;
@@ -435,6 +756,12 @@
     align-self: flex-start;
   }
   
+  /**
+   * Mobile button layout optimization
+   * 
+   * Stacks buttons vertically on mobile for better touch accessibility
+   * and consistent button sizing.
+   */
   .playlist-actions {
     justify-content: center;
     flex-direction: column;
@@ -447,7 +774,7 @@
   }
   
   .stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr;            /* Single column on mobile */
   }
   
   .page-numbers {
@@ -461,6 +788,11 @@
   }
 }
 
+/**
+ * Small mobile layout adjustments (480px and below)
+ * 
+ * Further optimizations for very small screens and older devices.
+ */
 @media (max-width: 480px) {
   .playlists-container {
     padding: 1rem;
@@ -474,6 +806,12 @@
     font-size: 1.2rem;
   }
   
+  /**
+   * Compact mobile track layout
+   * 
+   * Maximizes information density while maintaining readability
+   * on very small screens.
+   */
   .track-info-row {
     flex-direction: column;
     align-items: flex-start;
@@ -506,6 +844,16 @@
   }
 }
 
+/* ============================================================================ */
+/* WEATHER-RESPONSIVE MOOD ANIMATIONS */
+/* ============================================================================ */
+
+/**
+ * Energetic mood animations for sunny/clear weather
+ * 
+ * Subtle bouncing animation that reflects upbeat, energetic music
+ * recommendations for bright weather conditions.
+ */
 [data-mood="energetic"] .track-item {
   animation: gentle-bounce 4s ease-in-out infinite;
 }
@@ -515,6 +863,12 @@
   50% { transform: translateY(-1px); }
 }
 
+/**
+ * Contemplative mood animations for rainy weather
+ * 
+ * Slow breathing animation that reflects the introspective nature
+ * of music suited for rainy, contemplative weather.
+ */
 [data-mood="contemplative"] .playlists-container {
   animation: playlist-breath 8s ease-in-out infinite;
 }
@@ -524,6 +878,12 @@
   50% { transform: scale(1.002); }
 }
 
+/**
+ * Peaceful mood animations for calm weather
+ * 
+ * Gentle wave motion that reflects the serene quality of music
+ * recommended for peaceful weather conditions.
+ */
 [data-mood="peaceful"] .track-list {
   animation: peaceful-wave 12s ease-in-out infinite;
 }
@@ -533,7 +893,17 @@
   50% { transform: translateX(1px); }
 }
 
+/* ============================================================================ */
+/* ACCESSIBILITY AND PERFORMANCE OPTIMIZATIONS */
+/* ============================================================================ */
 
+/**
+ * Reduced motion accessibility support
+ * 
+ * Disables all animations for users who prefer reduced motion,
+ * ensuring the interface remains accessible for users with
+ * vestibular disorders or motion sensitivity.
+ */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -544,6 +914,12 @@
   }
 }
 
+/**
+ * High contrast mode support
+ * 
+ * Improves accessibility for users with visual impairments by
+ * increasing border contrast and background opacity.
+ */
 @media (prefers-contrast: high) {
   .track-item,
   .generation-stats,
@@ -553,6 +929,16 @@
   }
 }
 
+/* ============================================================================ */
+/* FOCUS MANAGEMENT AND KEYBOARD NAVIGATION */
+/* ============================================================================ */
+
+/**
+ * Focus indicators for keyboard navigation
+ * 
+ * Provides clear visual feedback for keyboard users navigating
+ * through interactive elements. Uses theme accent colors for consistency.
+ */
 .track-item:focus-within,
 .spotify-link:focus,
 .page-btn:focus,
@@ -563,6 +949,16 @@
   outline-offset: 2px;
 }
 
+/* ============================================================================ */
+/* ENHANCED INTERACTION EFFECTS */
+/* ============================================================================ */
+
+/**
+ * Enhanced hover effects for track items
+ * 
+ * Creates layered hover effects that enhance the feeling of
+ * interactivity and provide rich visual feedback.
+ */
 .track-item:hover .album-art {
   transform: scale(1.05);
 }

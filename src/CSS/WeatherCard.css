@@ -1,3 +1,51 @@
+/**
+ * WeatherCard.css - Weather Information Display Component
+ * 
+ * This stylesheet defines the weather information display that serves as
+ * the visual centerpiece connecting real-world conditions to music recommendations.
+ * It creates an immersive, atmospheric interface that bridges environmental
+ * data with the musical experience.
+ * 
+ * Key Features:
+ * - Dynamic weather icon animations that respond to conditions
+ * - Temperature and location display with glassmorphism design
+ * - Integrated music recommendation card for seamless experience
+ * - Weather-responsive mood animations that match current conditions
+ * - Real-time clock display with consistent typography
+ * - Interactive weather data cards with hover effects
+ * 
+ * Design Philosophy:
+ * The weather card creates an immersive connection between environmental
+ * conditions and the music experience, using visual cues and animations
+ * to reinforce this relationship. Every element is designed to enhance
+ * the user's awareness of how weather influences their musical journey.
+ * 
+ * Technical Implementation:
+ * - Flexible layout system that adapts to different content types
+ * - CSS animations that reflect real weather patterns
+ * - Dynamic theming integration for consistent visual experience
+ * - Performance-optimized animations using hardware acceleration
+ * - Responsive design that maintains functionality across devices
+ * 
+ */
+
+/* ============================================================================ */
+/* MAIN WEATHER CONTAINER - FLEXIBLE LAYOUT FOUNDATION */
+/* ============================================================================ */
+
+/**
+ * Main weather container with flexible layout
+ * 
+ * Provides structured layout for weather information and
+ * integrated music recommendations with consistent spacing.
+ * Uses flexbox for reliable vertical stacking and gap management.
+ * 
+ * Layout Features:
+ * - Full width utilization for optimal space usage
+ * - Flexible column direction for logical content flow
+ * - Consistent gap spacing between major sections
+ * - Smooth transitions for weather-based theme changes
+ */
 .weather-container {
   width: 100%;
   display: flex;
@@ -6,34 +54,83 @@
   transition: all 1s ease-in-out;
 }
 
+/* ============================================================================ */
+/* WEATHER INFORMATION SECTION - GLASSMORPHISM DISPLAY */
+/* ============================================================================ */
 
+/**
+ * Weather information section with glassmorphism design
+ * 
+ * Primary container for weather data with backdrop blur effects
+ * and dynamic theming that responds to weather conditions.
+ * Creates immersive visual connection between UI and environment.
+ * 
+ * Design Features:
+ * - Semi-transparent background with backdrop blur
+ * - Dynamic theming via CSS custom properties
+ * - Rounded corners for modern, friendly appearance
+ * - Subtle border for definition and depth
+ * - Shadow effects that adapt to weather themes
+ */
 .weather-info-section {
   background: var(--theme-card-bg, rgba(255, 255, 255, 0.15));
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);             /* Glassmorphism effect */
   border-radius: 24px;
   padding: 2rem;
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: var(--theme-shadows, 0 8px 32px rgba(0, 0, 0, 0.1));
-  transition: all 1s ease-in-out;
+  transition: all 1s ease-in-out;         /* Smooth theme transitions */
 }
 
+/**
+ * Weather section hover effects
+ * 
+ * Enhanced interactivity with lift animation and shadow changes
+ * that create depth and engagement. Encourages user interaction
+ * with weather information.
+ */
 .weather-info-section:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
+/* ============================================================================ */
+/* INTEGRATED MUSIC CARD - SEAMLESS CONTENT INTEGRATION */
+/* ============================================================================ */
 
+/**
+ * Integrated music card styling
+ * 
+ * Seamlessly integrates music recommendations within the weather
+ * display for cohesive user experience. Removes grid positioning
+ * to allow flexible integration within weather layout.
+ */
 .music-card-integrated {
   width: 100%;
 }
 
-
 .music-card-integrated .card-container {
   margin: 0;
-  grid-area: unset;
+  grid-area: unset;                        /* Remove grid positioning for integration */
 }
 
+/* ============================================================================ */
+/* GEOGRAPHIC LOCATION DISPLAY - CONTEXTUAL INFORMATION */
+/* ============================================================================ */
 
+/**
+ * City name display with prominent typography
+ * 
+ * Clear geographic context with dynamic theming and
+ * text shadow for improved readability. Establishes
+ * location context for weather information.
+ * 
+ * Typography Features:
+ * - Large, bold font for clear geographic identification
+ * - Dynamic color theming for weather responsiveness
+ * - Text shadow for depth and readability over complex backgrounds
+ * - Proper spacing for visual rhythm
+ */
 .city-container {
   margin-bottom: 1.5rem;
 }
@@ -46,7 +143,22 @@
   transition: color 1s ease-in-out;
 }
 
+/* ============================================================================ */
+/* WEATHER DATA DISPLAY - INTERACTIVE INFORMATION CARDS */
+/* ============================================================================ */
 
+/**
+ * Weather data display with interactive cards
+ * 
+ * Temperature and weather information presented in card format
+ * with glassmorphism effects and hover interactions. Creates
+ * engaging way to display numerical weather data.
+ * 
+ * Layout Features:
+ * - Vertical flex layout for logical information flow
+ * - Consistent gap spacing between data elements
+ * - Proper spacing from other content sections
+ */
 .weather {
   display: flex;
   flex-direction: column;
@@ -54,6 +166,20 @@
   margin-bottom: 1.5rem;
 }
 
+/**
+ * Temperature and feels-like temperature cards
+ * 
+ * Individual weather data points displayed as interactive cards
+ * with glassmorphism design and hover feedback. Provides tactile
+ * interaction with weather information.
+ * 
+ * Card Features:
+ * - Semi-transparent background with backdrop blur
+ * - Rounded corners for modern card appearance
+ * - Subtle border for definition
+ * - Dynamic theming for weather responsiveness
+ * - Smooth transitions for all interactive states
+ */
 .temp,
 .feels-like {
   font-size: 1.2rem;
@@ -67,12 +193,32 @@
   transition: all 1s ease-in-out;
 }
 
+/**
+ * Weather data hover effects
+ * 
+ * Interactive feedback with background changes and slide animations
+ * that enhance user engagement with weather information. Creates
+ * sense of interactivity and responsiveness.
+ */
 .temp:hover,
 .feels-like:hover {
   background: rgba(255, 255, 255, 0.15);
-  transform: translateX(4px);
+  transform: translateX(4px);              /* Slide effect on hover */
 }
 
+/**
+ * Weather description styling
+ * 
+ * Secondary weather information with italic styling
+ * and dynamic color theming. Provides qualitative
+ * description of weather conditions.
+ * 
+ * Typography Features:
+ * - Italic styling for descriptive text distinction
+ * - Capitalized text for proper presentation
+ * - Secondary color hierarchy
+ * - Proper spacing from numerical data
+ */
 .weather-description {
   font-size: 1rem;
   color: var(--theme-text-secondary, rgba(255, 255, 255, 0.9));
@@ -82,13 +228,30 @@
   transition: color 1s ease-in-out;
 }
 
+/* ============================================================================ */
+/* TIME AND ICON DISPLAY - CONTEXTUAL INFORMATION BAR */
+/* ============================================================================ */
 
+/**
+ * Time and weather icon display
+ * 
+ * Horizontal layout for current time and animated weather icon
+ * with proper spacing and alignment. Creates informational
+ * header for weather section.
+ */
 .weather-time-icon {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
+/**
+ * Current time display
+ * 
+ * Real-time clock display with consistent typography
+ * and dynamic theming integration. Provides temporal
+ * context for weather information.
+ */
 .current-time {
   font-size: 1.1rem;
   font-weight: 500;
@@ -96,88 +259,163 @@
   transition: color 1s ease-in-out;
 }
 
+/* ============================================================================ */
+/* ANIMATED WEATHER ICON - DYNAMIC VISUAL FEEDBACK */
+/* ============================================================================ */
+
+/**
+ * Animated weather icon with condition-specific styling
+ * 
+ * Dynamic weather icon that changes color and animation based
+ * on current weather conditions for enhanced visual feedback.
+ * Creates immediate visual connection to current conditions.
+ * 
+ * Icon Features:
+ * - Default sunny/warm color scheme
+ * - Floating animation for engaging movement
+ * - Condition-specific color changes
+ * - Smooth color transitions for theme changes
+ * - Proper sizing for visual balance
+ */
 .weather-icon {
-  color: #fbbf24;
+  color: #fbbf24;                          /* Default sunny color */
   display: inline-block;
   animation: float 3s ease-in-out infinite;
   font-size: 1.5rem;
   transition: color 0.3s ease;
 }
 
+/**
+ * Base floating animation for all weather icons
+ * 
+ * Gentle floating motion that adds life to the weather display
+ * while maintaining readability and focus. Creates subtle
+ * movement that draws attention without being distracting.
+ */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-6px); }
 }
 
-
+/**
+ * Weather-specific icon color variations
+ * 
+ * These selectors would be applied dynamically based on
+ * weather conditions to provide immediate visual feedback
+ * about current environmental conditions.
+ * 
+ * Color Coding:
+ * - Blue tones for rain and water-related weather
+ * - Light colors for snow and winter conditions
+ * - Gray tones for cloudy and overcast conditions
+ * - Bright colors for storms and dramatic weather
+ */
 .weather-icon:has(+ .weather-description:contains("rain")),
 .weather-icon:has(+ .weather-description:contains("drizzle")) {
-  color: #60a5fa;
+  color: #60a5fa;                          /* Blue for rain */
 }
 
 .weather-icon:has(+ .weather-description:contains("snow")) {
-  color: #e0e7ff;
+  color: #e0e7ff;                          /* Light blue/white for snow */
 }
 
 .weather-icon:has(+ .weather-description:contains("cloud")) {
-  color: #9ca3af;
+  color: #9ca3af;                          /* Gray for clouds */
 }
 
 .weather-icon:has(+ .weather-description:contains("storm")) {
-  color: #fbbf24;
+  color: #fbbf24;                          /* Bright yellow for storms */
   animation: lightning-pulse 2s ease-in-out infinite;
 }
 
+/**
+ * Lightning pulse animation for storm conditions
+ * 
+ * Creates dramatic pulsing effect for storm weather icons
+ * that simulates lightning flashes and intense weather.
+ */
 @keyframes lightning-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.7; filter: brightness(1.5); }
 }
 
+/* ============================================================================ */
+/* RESPONSIVE DESIGN - MOBILE OPTIMIZATION */
+/* ============================================================================ */
 
-
+/**
+ * Tablet and mobile layout adjustments (768px and below)
+ * 
+ * Optimizes weather card layout and typography for smaller screens
+ * while maintaining functionality and visual hierarchy.
+ */
 @media (max-width: 768px) {
   .weather-info-section {
-    padding: 1.5rem;
+    padding: 1.5rem;                       /* Reduced padding for mobile */
   }
   
   .city {
-    font-size: 1.5rem;
+    font-size: 1.5rem;                     /* Smaller city name for mobile */
   }
   
   .temp,
   .feels-like {
-    font-size: 1rem;
-    padding: 6px 12px;
+    font-size: 1rem;                       /* Smaller temperature text */
+    padding: 6px 12px;                     /* Reduced padding */
   }
   
   .current-time {
-    font-size: 1rem;
+    font-size: 1rem;                       /* Smaller time display */
   }
   
   .weather-container {
-    gap: 20px;
+    gap: 20px;                             /* Tighter spacing on mobile */
   }
 }
 
+/**
+ * Small mobile layout adjustments (480px and below)
+ * 
+ * Further optimizations for very small screens while
+ * maintaining readability and functionality.
+ */
 @media (max-width: 480px) {
   .weather-info-section {
-    padding: 1rem;
+    padding: 1rem;                         /* Minimal padding for small screens */
   }
   
   .city {
-    font-size: 1.3rem;
+    font-size: 1.3rem;                     /* Compact city name */
   }
   
   .weather {
-    gap: 0.5rem;
+    gap: 0.5rem;                           /* Tighter weather data spacing */
   }
   
   .weather-container {
-    gap: 15px;
+    gap: 15px;                             /* Minimal container spacing */
   }
 }
 
+/* ============================================================================ */
+/* WEATHER-RESPONSIVE MOOD ANIMATIONS */
+/* ============================================================================ */
 
+/**
+ * Weather-specific mood animations that reflect current conditions
+ * 
+ * Each animation is carefully crafted to enhance the connection
+ * between visual interface and environmental conditions. These
+ * animations create immersive experience that reinforces the
+ * relationship between weather and music.
+ */
+
+/**
+ * Contemplative mood animations for rainy weather
+ * 
+ * Ripple effect simulates rain drops hitting the weather card,
+ * creating atmospheric connection to actual rain conditions.
+ */
 [data-mood="contemplative"] .weather-info-section {
   animation: rain-ripple 4s ease-in-out infinite;
 }
@@ -187,6 +425,12 @@
   50% { box-shadow: var(--theme-shadows), inset 0 0 20px rgba(66, 153, 225, 0.1); }
 }
 
+/**
+ * Energetic mood animations for sunny weather
+ * 
+ * Brightness pulsing simulates warm sunshine and reflects
+ * the energetic quality of bright, clear weather.
+ */
 [data-mood="energetic"] .weather-info-section {
   animation: sunny-glow 5s ease-in-out infinite;
 }
@@ -196,7 +440,12 @@
   50% { filter: brightness(1.05); }
 }
 
-
+/**
+ * Intense mood animations for stormy weather
+ * 
+ * Shaking icon animation simulates the violent movement
+ * of storms and extreme weather conditions.
+ */
 [data-mood="intense"] .weather-icon {
   animation: storm-shake 1s ease-in-out infinite;
 }
@@ -207,7 +456,12 @@
   75% { transform: translateY(-4px) rotate(-1deg); }
 }
 
-
+/**
+ * Peaceful mood animations for snowy weather
+ * 
+ * Gentle drifting motion simulates the calm, peaceful
+ * movement of falling snow.
+ */
 [data-mood="peaceful"] .weather-icon {
   animation: snow-drift 6s ease-in-out infinite;
 }
@@ -218,7 +472,12 @@
   66% { transform: translateY(-6px) translateX(-2px); }
 }
 
-
+/**
+ * Ethereal mood animations for misty/foggy weather
+ * 
+ * Subtle blur effect simulates the mysterious, ethereal
+ * quality of fog and mist conditions.
+ */
 [data-mood="ethereal"] .weather-info-section {
   animation: mist-blur 8s ease-in-out infinite;
 }
@@ -228,7 +487,12 @@
   50% { filter: blur(0.5px); }
 }
 
-
+/**
+ * Mysterious mood animations for foggy weather
+ * 
+ * Fading weather description creates enigmatic effects
+ * that match the mysterious quality of fog conditions.
+ */
 [data-mood="mysterious"] .weather-description {
   animation: fog-fade 5s ease-in-out infinite;
 }
@@ -238,7 +502,12 @@
   50% { opacity: 0.6; }
 }
 
-
+/**
+ * Rugged mood animations for windy weather
+ * 
+ * Swaying motion simulates the dynamic movement
+ * of wind and challenging weather conditions.
+ */
 [data-mood="rugged"] .weather-info-section {
   animation: wind-sway 4s ease-in-out infinite;
 }
@@ -249,7 +518,12 @@
   75% { transform: rotate(-0.5deg); }
 }
 
-
+/**
+ * Romantic mood animations for pleasant evening weather
+ * 
+ * Gentle glow effect creates warm, romantic atmosphere
+ * perfect for beautiful weather conditions.
+ */
 [data-mood="romantic"] .weather-info-section {
   animation: moonlight-glow 6s ease-in-out infinite;
 }
@@ -259,7 +533,12 @@
   50% { box-shadow: var(--theme-shadows), 0 0 30px rgba(167, 139, 250, 0.2); }
 }
 
-
+/**
+ * Gritty mood animations for dusty/harsh weather
+ * 
+ * Subtle shaking reflects the rough, challenging
+ * nature of dusty or harsh weather conditions.
+ */
 [data-mood="gritty"] .weather-info-section {
   animation: gritty-shake 3s ease-in-out infinite;
 }
@@ -270,7 +549,12 @@
   75% { transform: translateX(-0.5px); }
 }
 
-
+/**
+ * Dreamy mood animations for hazy weather
+ * 
+ * Floating motion creates ethereal, dreamlike effects
+ * that match atmospheric, hazy conditions.
+ */
 [data-mood="dreamy"] .weather-info-section {
   animation: dreamy-float 8s ease-in-out infinite;
 }
@@ -280,7 +564,12 @@
   50% { transform: translateY(-3px); }
 }
 
-
+/**
+ * Chaotic mood animations for extreme weather
+ * 
+ * Complex wiggling motion reflects the unpredictable,
+ * chaotic nature of extreme weather events.
+ */
 [data-mood="chaotic"] .weather-icon {
   animation: chaotic-wiggle 2s ease-in-out infinite;
 }
@@ -292,7 +581,12 @@
   75% { transform: translateY(-3px) rotate(0.5deg); }
 }
 
-
+/**
+ * Ominous mood animations for severe weather warnings
+ * 
+ * Border color pulsing to warning colors reflects the
+ * serious, threatening nature of severe weather.
+ */
 [data-mood="ominous"] .weather-info-section {
   animation: ominous-pulse 3s ease-in-out infinite;
 }
@@ -302,7 +596,12 @@
   50% { border-color: rgba(245, 101, 101, 0.4); }
 }
 
-
+/**
+ * Gentle mood animations for mild weather
+ * 
+ * Breathing motion reflects the calm, comfortable
+ * nature of pleasant weather conditions.
+ */
 [data-mood="gentle"] .weather-info-section {
   animation: gentle-breath 6s ease-in-out infinite;
 }
@@ -310,4 +609,89 @@
 @keyframes gentle-breath {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.01); }
+}
+
+/* ============================================================================ */
+/* ACCESSIBILITY AND PERFORMANCE OPTIMIZATIONS */
+/* ============================================================================ */
+
+/**
+ * Reduced motion accessibility support
+ * 
+ * Respects user preferences for reduced motion by disabling
+ * all animations for users with vestibular disorders or
+ * motion sensitivity.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .weather-icon {
+    animation: none !important;
+  }
+}
+
+/**
+ * High contrast mode support
+ * 
+ * Improves accessibility for users with visual impairments
+ * by increasing border contrast and background opacity.
+ */
+@media (prefers-contrast: high) {
+  .weather-info-section,
+  .temp,
+  .feels-like {
+    border: 2px solid var(--theme-text-primary) !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+  }
+}
+
+/* ============================================================================ */
+/* FOCUS MANAGEMENT AND INTERACTION STATES */
+/* ============================================================================ */
+
+/**
+ * Focus indicators for interactive weather elements
+ * 
+ * Provides clear visual feedback for keyboard navigation
+ * and ensures weather information remains accessible.
+ */
+.temp:focus,
+.feels-like:focus {
+  outline: 2px solid var(--theme-accent);
+  outline-offset: 2px;
+}
+
+/**
+ * Enhanced interaction feedback
+ * 
+ * Additional micro-interactions that provide rich feedback
+ * for user engagement with weather information.
+ */
+.weather-info-section:active {
+  transform: translateY(-2px);
+  transition: transform 0.1s ease;
+}
+
+/* ============================================================================ */
+/* PERFORMANCE OPTIMIZATIONS */
+/* ============================================================================ */
+
+/**
+ * Hardware acceleration hints
+ * 
+ * Optimizes performance by hinting to the browser which
+ * properties will change during animations.
+ */
+.weather-info-section,
+.weather-icon,
+.temp,
+.feels-like {
+  will-change: transform, filter;
+  backface-visibility: hidden;
 }

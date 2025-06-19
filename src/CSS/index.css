@@ -1,3 +1,49 @@
+/**
+ * index.css - Global Theming System and Immersive Particle Animations
+ * 
+ * This stylesheet establishes the foundational theming architecture and
+ * sophisticated particle animation system for the WeatherBeats application.
+ * 
+ * Key Features:
+ * - CSS Custom Properties system for dynamic theming
+ * - Weather-responsive particle animation system
+ * - Global typography and layout foundations
+ * - Immersive background effects that match real-world conditions
+ * - Performance-optimized animations with hardware acceleration
+ * - Accessibility-first design with reduced motion support
+ * 
+ * Architecture:
+ * The theming system uses CSS Custom Properties (variables) that can be
+ * dynamically updated by JavaScript based on weather conditions, creating
+ * a seamless integration between real-world weather and UI presentation.
+ * 
+ * Particle System:
+ * Advanced CSS animations create immersive environmental effects using
+ * pseudo-elements, gradients, and transforms to simulate weather conditions
+ * without impacting application performance.
+ * 
+ */
+
+/* ============================================================================ */
+/* CSS CUSTOM PROPERTIES - DYNAMIC THEMING FOUNDATION */
+/* ============================================================================ */
+
+/**
+ * Root-level CSS custom properties for global theming
+ * 
+ * These variables define the core visual language of the application.
+ * They can be dynamically updated by JavaScript to create real-time
+ * theme changes based on weather conditions.
+ * 
+ * Theme Structure:
+ * - Background: Main application background gradients
+ * - Accent: Primary interactive element colors
+ * - Card Background: Semi-transparent overlay colors
+ * - Text: Primary and secondary text colors
+ * - Particles: Weather particle effect colors
+ * - Shadows: Dynamic shadow effects
+ * - Animation Speed: Global animation timing control
+ */
 :root {
   --theme-background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --theme-accent: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
@@ -9,42 +55,95 @@
   --animation-speed: 1s;
 }
 
+/* ============================================================================ */
+/* GLOBAL RESET AND TYPOGRAPHY FOUNDATION */
+/* ============================================================================ */
+
+/**
+ * CSS Reset for consistent cross-browser rendering
+ * 
+ * Normalizes default browser styles to ensure consistent appearance
+ * across different browsers and devices.
+ */
 * {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+  box-sizing: border-box;          /* Include padding and border in element width */
 }
 
+/**
+ * Global body styling with dynamic theming and performance optimization
+ * 
+ * Establishes base typography, background theming, and layout foundation.
+ * Uses hardware acceleration for smooth animations and transitions.
+ */
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: var(--theme-background) !important;
   min-height: 100vh;
   color: #333;
-  line-height: 1.6;
-  transition: all 1.5s ease-in-out;
+  line-height: 1.6;                /* Optimal reading line height */
+  transition: all 1.5s ease-in-out; /* Smooth theme transitions */
   position: relative;
-  overflow-x: hidden;
+  overflow-x: hidden;              /* Prevent horizontal scroll from animations */
 }
 
+/**
+ * Root container styling
+ * 
+ * Ensures proper positioning context for particle animations
+ * and maintains consistent viewport height utilization.
+ */
 #root {
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
 }
 
+/* ============================================================================ */
+/* IMMERSIVE PARTICLE ANIMATION SYSTEM */
+/* ============================================================================ */
+
+/**
+ * Base particle animation layer using pseudo-element
+ * 
+ * Creates full-viewport particle effects using the ::before pseudo-element.
+ * This approach is performance-optimized as it doesn't require additional DOM elements.
+ * 
+ * Technical Implementation:
+ * - Fixed positioning covers entire viewport
+ * - Pointer events disabled to prevent interaction interference
+ * - Z-index layering ensures particles appear behind content
+ * - Hardware acceleration via transform properties
+ */
 body::before {
   content: '';
-  position: fixed;
+  position: fixed;                 /* Fixed to viewport for consistent coverage */
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  pointer-events: none;
-  z-index: -1;
-  opacity: 0.6;
+  pointer-events: none;            /* Particles don't interfere with user interaction */
+  z-index: -1;                     /* Behind all content */
+  opacity: 0.6;                    /* Subtle effect that doesn't overwhelm */
   transition: all 1s ease-in-out;
 }
 
+/* ============================================================================ */
+/* WEATHER-SPECIFIC PARTICLE ANIMATIONS */
+/* ============================================================================ */
+
+/**
+ * RAINY WEATHER - Diagonal rain drops with realistic movement
+ * 
+ * Creates authentic rain effect using linear gradients positioned as rain drops.
+ * Animation simulates natural rain fall with slight horizontal drift.
+ * 
+ * Technical Details:
+ * - Linear gradients create rain streak appearance
+ * - Transform properties for diagonal movement
+ * - Background-size controls rain density
+ */
 .theme-rainy::before {
   background: 
     linear-gradient(transparent 50%, var(--theme-particle-color) 50%, var(--theme-particle-color) 52%, transparent 52%),
@@ -58,6 +157,12 @@ body::before {
   100% { transform: translateY(100vh) translateX(-20px); }
 }
 
+/**
+ * DRIZZLE WEATHER - Light, scattered droplets
+ * 
+ * Creates gentle drizzle effect with smaller, more scattered particles.
+ * Slower animation speed for realistic light rain appearance.
+ */
 .theme-drizzle::before {
   background: 
     radial-gradient(circle, var(--theme-particle-color) 1px, transparent 1px);
@@ -71,6 +176,12 @@ body::before {
   100% { transform: translateY(50px); opacity: 0; }
 }
 
+/**
+ * STORM WEATHER - Lightning flashes with dramatic effects
+ * 
+ * Creates intense storm atmosphere with lightning flash simulation.
+ * Uses opacity and background-color changes for lightning effects.
+ */
 .theme-storm::before {
   background: linear-gradient(45deg, transparent 40%, var(--theme-particle-color) 41%, var(--theme-particle-color) 43%, transparent 44%);
   background-size: 100px 100px;
@@ -83,6 +194,13 @@ body::before {
   2%, 4% { opacity: 0.8; }
 }
 
+/**
+ * WINTER WEATHER - Realistic snowfall with rotation
+ * 
+ * Creates beautiful snowfall effect using multiple radial gradients.
+ * Different particle sizes simulate natural snow variation.
+ * Rotation adds realistic tumbling motion.
+ */
 .theme-winter::before {
   background: 
     radial-gradient(circle, var(--theme-particle-color) 2px, transparent 2px),
@@ -96,6 +214,12 @@ body::before {
   100% { transform: translateY(100vh) rotate(360deg); }
 }
 
+/**
+ * CLOUDY WEATHER - Slow-moving cloud formations
+ * 
+ * Creates atmospheric cloud movement using elliptical gradients.
+ * Slow, gentle animation matches natural cloud drift patterns.
+ */
 .theme-cloudy::before {
   background: 
     radial-gradient(ellipse 200px 50px, var(--theme-particle-color) 40%, transparent 50%);
@@ -108,6 +232,12 @@ body::before {
   50% { transform: translateX(50px); }
 }
 
+/**
+ * MISTY WEATHER - Flowing atmospheric haze
+ * 
+ * Creates ethereal mist effect with opacity variations.
+ * Vertical movement simulates rising mist patterns.
+ */
 .theme-misty::before {
   background: 
     radial-gradient(ellipse 300px 100px, var(--theme-particle-color) 20%, transparent 70%);
@@ -120,6 +250,12 @@ body::before {
   50% { transform: translateY(-30px) scale(1.1); opacity: 0.6; }
 }
 
+/**
+ * SMOKY WEATHER - Rising smoke particles
+ * 
+ * Creates vertical smoke movement with rotation and opacity changes.
+ * Simulates smoke rising and dispersing naturally.
+ */
 .theme-smoky::before {
   background: 
     radial-gradient(ellipse 100px 200px, var(--theme-particle-color) 30%, transparent 70%);
@@ -134,6 +270,12 @@ body::before {
   100% { transform: translateY(-100px) rotate(10deg); opacity: 0; }
 }
 
+/**
+ * HAZY WEATHER - Psychedelic atmospheric effects
+ * 
+ * Creates complex haze effect with rotation and color shifting.
+ * Uses filter properties for dynamic visual effects.
+ */
 .theme-hazy::before {
   background: 
     radial-gradient(circle, var(--theme-particle-color) 20%, transparent 50%),
@@ -148,6 +290,12 @@ body::before {
   66% { transform: scale(0.9) rotate(240deg); filter: hue-rotate(120deg); }
 }
 
+/**
+ * DUSTY WEATHER - Swirling dust particles
+ * 
+ * Creates dusty atmosphere with circular motion patterns.
+ * Particles rotate while moving vertically for realistic dust behavior.
+ */
 .theme-dusty::before {
   background: 
     radial-gradient(circle, var(--theme-particle-color) 1px, transparent 1px);
@@ -160,6 +308,12 @@ body::before {
   100% { transform: rotate(360deg) translateY(-20px); }
 }
 
+/**
+ * FOGGY WEATHER - Rolling fog banks
+ * 
+ * Creates fog effect with horizontal movement across the screen.
+ * Large elliptical gradients simulate thick fog formations.
+ */
 .theme-foggy::before {
   background: 
     radial-gradient(ellipse 400px 100px, var(--theme-particle-color) 40%, transparent 70%);
@@ -172,6 +326,12 @@ body::before {
   100% { transform: translateX(100vw); }
 }
 
+/**
+ * APOCALYPTIC WEATHER - Falling ash and debris
+ * 
+ * Creates dramatic post-apocalyptic atmosphere with falling particles.
+ * Combines multiple gradient types for complex particle effects.
+ */
 .theme-apocalyptic::before {
   background: 
     radial-gradient(circle, var(--theme-particle-color) 1px, transparent 1px),
@@ -185,6 +345,12 @@ body::before {
   100% { transform: translateY(100vh) scale(0.8); }
 }
 
+/**
+ * CHAOTIC WEATHER - Tornado-like vortex effects
+ * 
+ * Creates intense spinning vortex for extreme weather conditions.
+ * Uses conic gradients with scaling for dramatic visual impact.
+ */
 .theme-chaotic::before {
   background: 
     conic-gradient(from 0deg, transparent 70%, var(--theme-particle-color) 80%, transparent 90%);
@@ -197,6 +363,12 @@ body::before {
   100% { transform: rotate(360deg) scale(1.2); }
 }
 
+/**
+ * SUNNY WEATHER - Rotating sun rays
+ * 
+ * Creates warm, bright atmosphere with rotating sun ray effects.
+ * Slow rotation simulates gentle, warm sunshine.
+ */
 .theme-sunny::before {
   background: 
     conic-gradient(from 0deg, transparent 85%, var(--theme-particle-color) 90%, transparent 95%);
@@ -209,6 +381,12 @@ body::before {
   100% { transform: rotate(360deg); }
 }
 
+/**
+ * STARRY WEATHER - Twinkling night sky
+ * 
+ * Creates magical starfield with twinkling effects.
+ * Multiple star layers with different sizes and timing create depth.
+ */
 .theme-starry::before {
   background: 
     radial-gradient(circle, var(--theme-particle-color) 1px, transparent 1px),
@@ -222,7 +400,16 @@ body::before {
   50% { opacity: 1; }
 }
 
+/* ============================================================================ */
+/* GLOBAL ANIMATIONS AND UTILITIES */
+/* ============================================================================ */
 
+/**
+ * Fade-in animation for smooth content appearance
+ * 
+ * Provides polished entrance effect for page loads and content updates.
+ * Combines opacity and transform for smooth visual transition.
+ */
 .fade-in {
   animation: fadeIn 0.5s ease-in;
 }
@@ -232,6 +419,12 @@ body::before {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/**
+ * Loading spinner animation
+ * 
+ * Reusable spinning animation for loading indicators throughout the app.
+ * Hardware-accelerated for smooth performance.
+ */
 .loading-spinner {
   animation: spin 1s linear infinite;
 }
@@ -241,6 +434,12 @@ body::before {
   to { transform: rotate(360deg); }
 }
 
+/**
+ * Development theme indicator
+ * 
+ * Visual indicator showing current theme state during development.
+ * Helps developers understand active theme and mood states.
+ */
 .theme-indicator {
   position: fixed;
   top: 10px;
@@ -261,7 +460,16 @@ body::before {
   transform: scale(1.05);
 }
 
+/* ============================================================================ */
+/* RESPONSIVE DESIGN OPTIMIZATIONS */
+/* ============================================================================ */
 
+/**
+ * Mobile-specific optimizations
+ * 
+ * Reduces particle animation intensity on mobile devices for better
+ * performance and battery life. Repositions UI elements for touch interfaces.
+ */
 @media (max-width: 768px) {
   .theme-indicator {
     position: relative;
@@ -272,11 +480,23 @@ body::before {
     width: fit-content;
   }
   
+  /* Reduce particle opacity on mobile for better performance */
   body::before {
     opacity: 0.3 !important;
   }
 }
 
+/* ============================================================================ */
+/* ACCESSIBILITY AND PERFORMANCE CONSIDERATIONS */
+/* ============================================================================ */
+
+/**
+ * Reduced motion accessibility support
+ * 
+ * Respects user preferences for reduced motion to accommodate users with
+ * vestibular disorders or motion sensitivity. Disables all animations
+ * when reduce motion is preferred.
+ */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -286,11 +506,18 @@ body::before {
     transition-duration: 0.01ms !important;
   }
   
+  /* Completely disable particle animations for motion-sensitive users */
   body::before {
     display: none !important;
   }
 }
 
+/**
+ * High contrast mode support
+ * 
+ * Improves accessibility for users with visual impairments by increasing
+ * contrast and making interface elements more distinct.
+ */
 @media (prefers-contrast: high) {
   .weather-container,
   .card-container,
@@ -302,6 +529,13 @@ body::before {
   }
 }
 
+/**
+ * Print styles optimization
+ * 
+ * Optimizes the application for printing by removing animations,
+ * backgrounds, and unnecessary visual effects. Ensures content
+ * remains readable and functional when printed.
+ */
 @media print {
   body::before,
   .theme-indicator {

@@ -1,20 +1,90 @@
+/**
+ * Settings.css - User Preferences and Configuration Interface
+ * 
+ * This stylesheet defines the comprehensive settings interface that allows
+ * users to customize their playlist generation experience and application behavior.
+ * 
+ * Key Features:
+ * - Custom-styled form controls with glassmorphism design
+ * - Animated toggle switches with smooth state transitions
+ * - Weather-responsive mood animations that match current conditions
+ * - Accessible form design with proper focus management
+ * - Responsive layout adaptation for mobile devices
+ * - Consistent visual integration with overall application theme
+ * 
+ * Design Philosophy:
+ * The settings interface maintains visual consistency with the overall
+ * application while providing clear, intuitive controls for user preferences.
+ * Every control is designed to be immediately understandable while offering
+ * sophisticated visual feedback.
+ * 
+ * Technical Implementation:
+ * - Custom form control styling that replaces browser defaults
+ * - CSS-only toggle switches with smooth animations
+ * - Glassmorphism effects for visual consistency
+ * - Hardware-accelerated animations for smooth performance
+ * - Comprehensive accessibility features
+ * 
+ */
+
+/* ============================================================================ */
+/* MAIN SETTINGS CONTAINER - GLASSMORPHISM FOUNDATION */
+/* ============================================================================ */
+
+/**
+ * Main settings container with glassmorphism design
+ * 
+ * Implements consistent card-based design with backdrop blur effects
+ * and dynamic theming integration for weather-responsive styling.
+ * Positioned within CSS Grid layout for optimal space utilization.
+ * 
+ * Design Features:
+ * - CSS Grid area positioning for layout integration
+ * - Glassmorphism effects with backdrop blur
+ * - Dynamic theming via CSS custom properties
+ * - Adaptive height based on content
+ * - Smooth theme transitions for weather changes
+ */
 .settings-container {
-  grid-area: settings;
+  grid-area: settings;                     /* CSS Grid positioning */
   background: var(--theme-card-bg, rgba(255, 255, 255, 0.15));
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);             /* Glassmorphism effect */
   border-radius: 24px;
   padding: 2rem;
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: var(--theme-shadows, 0 8px 32px rgba(0, 0, 0, 0.1));
-  height: fit-content;
-  transition: all 1s ease-in-out;
+  height: fit-content;                     /* Adapt to content height */
+  transition: all 1s ease-in-out;         /* Smooth theme transitions */
 }
 
+/**
+ * Settings container hover effects
+ * 
+ * Subtle lift animation provides visual feedback and enhances
+ * the interactive feeling of the settings panel. Creates sense
+ * of depth and responsiveness.
+ */
 .settings-container:hover {
   transform: translateY(-4px);
 }
 
+/* ============================================================================ */
+/* TYPOGRAPHY HIERARCHY - SEMANTIC HEADING SYSTEM */
+/* ============================================================================ */
 
+/**
+ * Settings header typography
+ * 
+ * Clear section heading with dynamic theming and text shadow
+ * for improved readability over complex backgrounds. Establishes
+ * visual hierarchy within the settings interface.
+ * 
+ * Typography Features:
+ * - Large, bold font for clear section identification
+ * - Dynamic color theming for weather responsiveness
+ * - Text shadow for depth and readability
+ * - Proper spacing for visual rhythm
+ */
 .settings-header {
   font-size: 1.5rem;
   font-weight: 700;
@@ -24,7 +94,23 @@
   transition: color 1s ease-in-out;
 }
 
+/* ============================================================================ */
+/* FORM LABELS - ACCESSIBLE INPUT IDENTIFICATION */
+/* ============================================================================ */
 
+/**
+ * Form label styling with consistent typography
+ * 
+ * Provides clear, accessible labels for form controls with
+ * dynamic color theming and proper spacing. Ensures all
+ * form controls are properly identified for screen readers.
+ * 
+ * Accessibility Features:
+ * - High contrast text for readability
+ * - Proper spacing for visual separation
+ * - Dynamic theming for visual consistency
+ * - Semantic block display for proper layout
+ */
 .playlist-label,
 .content-label {
   display: block;
@@ -35,6 +121,31 @@
   transition: color 1s ease-in-out;
 }
 
+/* ============================================================================ */
+/* CUSTOM SELECT DROPDOWN - GLASSMORPHISM FORM CONTROL */
+/* ============================================================================ */
+
+/**
+ * Custom-styled select dropdown with glassmorphism design
+ * 
+ * Replaces default browser select styling with custom design that
+ * integrates seamlessly with the application's visual language.
+ * Features custom dropdown arrow and glassmorphism effects.
+ * 
+ * Technical Implementation:
+ * - appearance: none removes browser default styling
+ * - Custom SVG dropdown arrow via background-image
+ * - Backdrop blur for glassmorphism integration
+ * - Full width with proper touch target sizing
+ * - Consistent color theming throughout
+ * 
+ * Features:
+ * - Custom dropdown arrow using SVG data URI
+ * - Backdrop blur effects for glassmorphism
+ * - Hover and focus states with smooth transitions
+ * - Cross-browser compatibility
+ * - Accessible keyboard navigation
+ */
 .settings-options {
   width: 100%;
   padding: 12px 16px;
@@ -47,28 +158,60 @@
   margin-bottom: 1.5rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  appearance: none;
+  appearance: none;                        /* Remove default browser styling */
+  
+  /* Custom dropdown arrow using SVG data URI */
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
   background-position: right 12px center;
   background-size: 16px;
-  padding-right: 40px;
+  padding-right: 40px;                     /* Space for custom arrow */
 }
 
+/**
+ * Select dropdown hover and focus states
+ * 
+ * Enhanced interactivity with background changes and lift effects
+ * that provide clear feedback for user interactions. Removes
+ * default browser focus outline in favor of custom styling.
+ */
 .settings-options:hover,
 .settings-options:focus {
   background: rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.3);
-  outline: none;
-  transform: translateY(-1px);
+  outline: none;                           /* Custom focus styling instead */
+  transform: translateY(-1px);             /* Subtle lift effect */
 }
 
+/**
+ * Select option styling for dropdown menu
+ * 
+ * Ensures readable dropdown options with dark background
+ * for cross-browser compatibility and proper contrast.
+ */
 .settings-options option {
-  background: #1f2937;
+  background: #1f2937;                     /* Dark background for readability */
   color: white;
   padding: 8px;
 }
 
+/* ============================================================================ */
+/* CUSTOM TOGGLE SWITCH COMPONENT - ADVANCED FORM CONTROL */
+/* ============================================================================ */
+
+/**
+ * Custom toggle switch container
+ * 
+ * Replaces default checkbox with custom toggle switch design
+ * that provides clear visual feedback for boolean settings.
+ * Uses relative positioning to contain absolutely positioned elements.
+ * 
+ * Container Features:
+ * - Fixed dimensions for consistent appearance
+ * - Relative positioning for child element containment
+ * - Proper spacing from associated labels
+ * - Inline-block display for flexible layout
+ */
 .switch {
   position: relative;
   display: inline-block;
@@ -77,12 +220,33 @@
   margin-top: 8px;
 }
 
+/**
+ * Hidden checkbox input
+ * 
+ * Maintains accessibility and form functionality while
+ * hiding the default checkbox appearance. The input remains
+ * functional for keyboard navigation and screen readers.
+ */
 .switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
 
+/**
+ * Toggle switch track/background
+ * 
+ * Creates the visual track for the toggle switch with
+ * glassmorphism effects and smooth state transitions.
+ * Acts as the clickable area for the entire switch.
+ * 
+ * Visual Design:
+ * - Rounded pill shape for modern appearance
+ * - Semi-transparent background with blur effects
+ * - Subtle border for definition
+ * - Smooth transitions for all state changes
+ * - Cursor pointer for interactivity indication
+ */
 .slider-round {
   position: absolute;
   cursor: pointer;
@@ -90,13 +254,27 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.2);
-  transition: .4s;
-  border-radius: 34px;
+  background: rgba(255, 255, 255, 0.2);    /* Inactive state background */
+  transition: .4s;                         /* Smooth state transitions */
+  border-radius: 34px;                     /* Pill-shaped track */
   border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);             /* Glassmorphism effect */
 }
 
+/**
+ * Toggle switch thumb/handle
+ * 
+ * Creates the draggable thumb element with gradient styling
+ * and smooth position transitions. This element slides along
+ * the track to indicate the current state.
+ * 
+ * Thumb Features:
+ * - Circular shape with gradient background
+ * - Precise positioning within track
+ * - Smooth sliding animation via transform
+ * - Subtle shadow for depth perception
+ * - High-contrast styling for visibility
+ */
 .slider-round:before {
   position: absolute;
   content: "";
@@ -105,28 +283,67 @@
   left: 4px;
   bottom: 4px;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  transition: .4s;
-  border-radius: 50%;
+  transition: .4s;                         /* Smooth sliding animation */
+  border-radius: 50%;                      /* Perfect circle */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
+/**
+ * Toggle switch hover effects
+ * 
+ * Enhanced interactivity with background changes that
+ * indicate the switch is interactive and ready for use.
+ */
 .slider-round:hover {
   background: rgba(255, 255, 255, 0.25);
   border-color: rgba(255, 255, 255, 0.2);
 }
 
+/**
+ * Active/checked toggle switch state
+ * 
+ * Uses green gradient to indicate active state with
+ * enhanced visual feedback and glow effects. Represents
+ * the "on" or "enabled" state of the toggle.
+ * 
+ * Active State Features:
+ * - Green gradient background for positive indication
+ * - Enhanced border color for definition
+ * - Subtle glow effect for emphasis
+ * - Clear visual distinction from inactive state
+ */
 input:checked + .slider-round {
   background: linear-gradient(135deg, #10b981 0%, #065f46 100%);
   border-color: rgba(16, 185, 129, 0.3);
   box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
 }
 
+/**
+ * Active toggle switch thumb position
+ * 
+ * Slides the thumb to the right position with white styling
+ * to contrast against the green active background. The transform
+ * creates smooth sliding motion.
+ */
 input:checked + .slider-round:before {
-  transform: translateX(26px);
-  background: white;
+  transform: translateX(26px);             /* Slide to active position */
+  background: white;                       /* High contrast against green */
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
 }
 
+/**
+ * Toggle switch ripple effect
+ * 
+ * Creates expanding ripple effect on interaction for
+ * enhanced tactile feedback. This is especially useful
+ * for touch interfaces and provides satisfying interaction feedback.
+ * 
+ * Ripple Features:
+ * - Expands from center on interaction
+ * - Semi-transparent for subtle effect
+ * - Disabled pointer events to prevent interference
+ * - Smooth expansion animation
+ */
 .slider-round::after {
   content: '';
   position: absolute;
@@ -138,36 +355,57 @@ input:checked + .slider-round:before {
   border-radius: 50%;
   transform: translate(-50%, -50%);
   transition: width 0.3s ease, height 0.3s ease;
-  pointer-events: none;
+  pointer-events: none;                    /* Don't interfere with clicking */
 }
 
+/**
+ * Active ripple effect on interaction
+ * 
+ * Triggers the ripple expansion when the switch is actively
+ * being interacted with (mouse down or touch).
+ */
 .switch:active .slider-round::after {
   width: 60px;
   height: 60px;
 }
 
+/* ============================================================================ */
+/* RESPONSIVE DESIGN - MOBILE OPTIMIZATION */
+/* ============================================================================ */
 
+/**
+ * Tablet and mobile layout adjustments (768px and below)
+ * 
+ * Optimizes settings interface for smaller screens while
+ * maintaining functionality and accessibility standards.
+ */
 @media (max-width: 768px) {
   .settings-container {
-    padding: 1.5rem;
+    padding: 1.5rem;                       /* Reduced padding for mobile */
   }
   
   .settings-header {
-    font-size: 1.3rem;
+    font-size: 1.3rem;                     /* Smaller header for mobile */
   }
   
   .playlist-label,
   .content-label {
-    font-size: 0.95rem;
+    font-size: 0.95rem;                    /* Slightly smaller labels */
   }
   
   .settings-options {
-    padding: 10px 14px;
-    font-size: 0.95rem;
-    background-size: 14px;
-    padding-right: 35px;
+    padding: 10px 14px;                    /* Reduced padding */
+    font-size: 0.95rem;                    /* Smaller font for mobile */
+    background-size: 14px;                 /* Smaller dropdown arrow */
+    padding-right: 35px;                   /* Adjusted arrow spacing */
   }
   
+  /**
+   * Mobile toggle switch sizing
+   * 
+   * Slightly smaller toggle switches for mobile while
+   * maintaining accessibility and touch target requirements.
+   */
   .switch {
     width: 55px;
     height: 30px;
@@ -181,27 +419,50 @@ input:checked + .slider-round:before {
   }
   
   input:checked + .slider-round:before {
-    transform: translateX(25px);
+    transform: translateX(25px);           /* Adjusted slide distance */
   }
 }
 
+/**
+ * Small mobile layout adjustments (480px and below)
+ * 
+ * Further optimizations for very small screens and older devices
+ * while ensuring all controls remain functional and accessible.
+ */
 @media (max-width: 480px) {
   .settings-container {
-    padding: 1rem;
+    padding: 1rem;                         /* Minimal padding for small screens */
   }
   
   .settings-header {
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
+    font-size: 1.2rem;                     /* Compact header size */
+    margin-bottom: 1rem;                   /* Tighter spacing */
   }
   
   .settings-options {
-    padding: 8px 12px;
-    font-size: 0.9rem;
+    padding: 8px 12px;                     /* Minimal padding */
+    font-size: 0.9rem;                     /* Compact font size */
   }
 }
 
+/* ============================================================================ */
+/* WEATHER-RESPONSIVE MOOD ANIMATIONS FOR SETTINGS */
+/* ============================================================================ */
 
+/**
+ * Settings-specific mood animations that reflect weather conditions
+ * 
+ * Each animation is tailored to enhance the settings interface
+ * while maintaining consistency with overall weather theming.
+ * These subtle animations create cohesive experience throughout the app.
+ */
+
+/**
+ * Energetic mood animations for sunny/clear weather
+ * 
+ * Bouncing toggle switches reflect the upbeat nature of
+ * sunny weather conditions.
+ */
 [data-mood="energetic"] .switch {
   animation: settings-bounce 3s ease-in-out infinite;
 }
@@ -211,6 +472,12 @@ input:checked + .slider-round:before {
   50% { transform: translateY(-2px); }
 }
 
+/**
+ * Contemplative mood animations for rainy weather
+ * 
+ * Gentle breathing animation reflects the introspective quality
+ * of rainy weather conditions.
+ */
 [data-mood="contemplative"] .settings-container {
   animation: settings-breath 8s ease-in-out infinite;
 }
@@ -220,10 +487,22 @@ input:checked + .slider-round:before {
   50% { transform: scale(1.01); }
 }
 
+/**
+ * Intense mood animations for stormy weather
+ * 
+ * Enhanced focus glow effects reflect the dramatic nature
+ * of stormy weather conditions.
+ */
 [data-mood="intense"] .settings-options:focus {
   box-shadow: 0 0 20px var(--theme-accent);
 }
 
+/**
+ * Peaceful mood animations for calm weather
+ * 
+ * Gentle floating header reflects the serene quality
+ * of peaceful weather conditions.
+ */
 [data-mood="peaceful"] .settings-header {
   animation: peaceful-float 6s ease-in-out infinite;
 }
@@ -233,7 +512,12 @@ input:checked + .slider-round:before {
   50% { transform: translateY(-1px); }
 }
 
-
+/**
+ * Dreamy mood animations for hazy weather
+ * 
+ * Color-shifting toggle switches create ethereal effects
+ * that match atmospheric weather conditions.
+ */
 [data-mood="dreamy"] .slider-round {
   animation: dreamy-shift 8s ease-in-out infinite;
 }
@@ -244,6 +528,12 @@ input:checked + .slider-round:before {
   66% { filter: hue-rotate(-5deg); }
 }
 
+/**
+ * Ethereal mood animations for foggy weather
+ * 
+ * Brightness pulsing creates mystical effects perfect
+ * for atmospheric, mysterious weather conditions.
+ */
 [data-mood="ethereal"] .settings-container {
   animation: ethereal-glow 5s ease-in-out infinite;
 }
@@ -253,6 +543,12 @@ input:checked + .slider-round:before {
   50% { filter: brightness(1.05); }
 }
 
+/**
+ * Gritty mood animations for dusty/harsh weather
+ * 
+ * Subtle shaking effects reflect the rough, textured
+ * quality of challenging weather conditions.
+ */
 [data-mood="gritty"] .settings-options {
   animation: gritty-shake 4s ease-in-out infinite;
 }
@@ -263,6 +559,12 @@ input:checked + .slider-round:before {
   75% { transform: translateX(-0.5px); }
 }
 
+/**
+ * Rugged mood animations for windy weather
+ * 
+ * Text shadow pulsing reflects the bold, dynamic nature
+ * of windy weather conditions.
+ */
 [data-mood="rugged"] .settings-header {
   animation: rugged-pulse 3s ease-in-out infinite;
 }
@@ -272,6 +574,12 @@ input:checked + .slider-round:before {
   50% { text-shadow: 0 2px 15px rgba(0, 0, 0, 0.4); }
 }
 
+/**
+ * Chaotic mood animations for extreme weather
+ * 
+ * Wiggling toggle switches reflect the unpredictable
+ * nature of chaotic weather conditions.
+ */
 [data-mood="chaotic"] .switch {
   animation: chaotic-wiggle 2s ease-in-out infinite;
 }
@@ -282,6 +590,12 @@ input:checked + .slider-round:before {
   75% { transform: rotate(-0.5deg); }
 }
 
+/**
+ * Mysterious mood animations for night/unknown weather
+ * 
+ * Fading labels create enigmatic effects that match
+ * the mysterious quality of nighttime conditions.
+ */
 [data-mood="mysterious"] .playlist-label,
 [data-mood="mysterious"] .content-label {
   animation: mysterious-fade 4s ease-in-out infinite;
@@ -292,6 +606,12 @@ input:checked + .slider-round:before {
   50% { opacity: 0.8; }
 }
 
+/**
+ * Ominous mood animations for severe weather warnings
+ * 
+ * Border color pulsing to warning colors reflects the serious
+ * nature of severe weather conditions.
+ */
 [data-mood="ominous"] .settings-container {
   animation: ominous-pulse 3s ease-in-out infinite;
 }
@@ -301,6 +621,12 @@ input:checked + .slider-round:before {
   50% { border-color: rgba(245, 101, 101, 0.4); }
 }
 
+/**
+ * Romantic mood animations for pleasant evening weather
+ * 
+ * Gentle swaying dropdowns reflect the soft, romantic quality
+ * of beautiful weather conditions.
+ */
 [data-mood="romantic"] .settings-options {
   animation: romantic-sway 6s ease-in-out infinite;
 }
@@ -311,6 +637,12 @@ input:checked + .slider-round:before {
   75% { transform: rotate(-0.1deg); }
 }
 
+/**
+ * Gentle mood animations for mild weather
+ * 
+ * Subtle glowing effects on toggle switch thumbs reflect
+ * the calm, gentle nature of comfortable weather.
+ */
 [data-mood="gentle"] .slider-round:before {
   animation: gentle-glow 4s ease-in-out infinite;
 }
@@ -320,7 +652,17 @@ input:checked + .slider-round:before {
   50% { box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3); }
 }
 
+/* ============================================================================ */
+/* ACCESSIBILITY AND INTERACTION ENHANCEMENTS */
+/* ============================================================================ */
 
+/**
+ * Focus indicators for keyboard navigation
+ * 
+ * Provides clear visual indicators for users navigating with
+ * keyboard or assistive technologies. Uses consistent accent
+ * colors for focus indication across all form controls.
+ */
 .settings-options:focus {
   outline: 2px solid var(--theme-accent);
   outline-offset: 2px;
@@ -331,20 +673,41 @@ input:checked + .slider-round:before {
   outline-offset: 2px;
 }
 
-
+/**
+ * Enhanced label interactions
+ * 
+ * Subtle movement on hover provides feedback that labels
+ * are associated with interactive elements.
+ */
 .playlist-label:hover,
 .content-label:hover {
   transform: translateX(2px);
   transition: transform 0.2s ease;
 }
 
+/**
+ * Active state feedback for dropdowns
+ * 
+ * Provides tactile feedback when dropdowns are actively
+ * being selected or changed.
+ */
 .settings-options:active {
   transform: scale(0.98);
 }
 
+/* ============================================================================ */
+/* LOADING AND DISABLED STATES */
+/* ============================================================================ */
+
+/**
+ * Loading state for settings container
+ * 
+ * Provides visual feedback when settings are being saved
+ * or loaded, preventing user interaction during processing.
+ */
 .settings-container.loading {
   opacity: 0.7;
-  pointer-events: none;
+  pointer-events: none;                    /* Prevent interaction during loading */
 }
 
 .settings-container.loading::after {
@@ -361,7 +724,27 @@ input:checked + .slider-round:before {
   transform: translate(-50%, -50%);
 }
 
+/**
+ * Spinner animation for loading states
+ * 
+ * Reusable spinning animation for loading indicators
+ * throughout the settings interface.
+ */
+@keyframes spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
 
+/* ============================================================================ */
+/* SCROLLBAR STYLING FOR SELECT DROPDOWNS */
+/* ============================================================================ */
+
+/**
+ * Custom scrollbar styling for dropdown options
+ * 
+ * Provides consistent scrollbar appearance that matches
+ * the application's design language for long option lists.
+ */
 .settings-options::-webkit-scrollbar {
   width: 8px;
 }
@@ -378,4 +761,38 @@ input:checked + .slider-round:before {
 
 .settings-options::-webkit-scrollbar-thumb:hover {
   background: var(--theme-text-primary);
+}
+
+/* ============================================================================ */
+/* PERFORMANCE OPTIMIZATIONS */
+/* ============================================================================ */
+
+/**
+ * Hardware acceleration hints
+ * 
+ * Optimizes performance by hinting to the browser which
+ * properties will change during animations.
+ */
+.settings-container,
+.switch,
+.slider-round,
+.settings-options {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/**
+ * Reduced motion accessibility support
+ * 
+ * Respects user preferences for reduced motion by disabling
+ * all animations for users with vestibular disorders.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
